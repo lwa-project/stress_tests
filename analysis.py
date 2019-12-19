@@ -17,7 +17,7 @@ from scipy.optimize import leastsq
 
 from lsl.common import stations
 from lsl.sim.vis import srcs as simSrcs
-from lsl.common.mcs import applyPointingCorrection
+from lsl.common.mcs import apply_pointing_correction
 
 __version__ = "0.2"
 __revision__ = "$Rev$"
@@ -163,7 +163,7 @@ def parse(filename, station=stations.lwa1):
     srcs = getSources()
     
     # Get an observer for the station
-    obs = station.getObserver()
+    obs = station.get_observer()
     
     # Open the file and run with it
     fh = open(filename, 'r')
@@ -184,13 +184,13 @@ def parse(filename, station=stations.lwa1):
         fields = line.split()
         nFields = len(fields)
         if nFields == 9:
-            srcName, dateStr, timeStr, freqMHz, zenithAngle, raError, decError, sefd, fwhm = fields
+            srcName, dateStr, timeStr, freq_MHz, zenithAngle, raError, decError, sefd, fwhm = fields
         elif nFields == 8:
             srcName, dateStr, timeStr, zenithAngle, raError, decError, sefd, fwhm = fields
-            freqMHz = '-1.0'
+            freq_MHz = '-1.0'
         elif nFields == 7:
             srcName, dateStr, timeStr, zenithAngle, raError, decError, sefd = fields
-            freqMHz = '-1.0'
+            freq_MHz = '-1.0'
             fwhm = '-1.0'
         else:
             raise RuntimeError("Expected 7, 8, or 9 fields per line, found %i" % nFields)
@@ -206,7 +206,7 @@ def parse(filename, station=stations.lwa1):
         entry = {}
         entry['name'] = srcName
         entry['date'] = '%s %s' % (dateStr, timeStr)
-        entry['freqMHz'] = float(freqMHz)
+        entry['freq_MHz'] = float(freq_MHz)
         entry['raError'] = ephem.hours(raError)
         entry['decError'] = ephem.degrees(decError)
         entry['SEFD'] = float(sefd)
@@ -323,7 +323,7 @@ def _rotationErrorFunction(data, theta, phi, psi, verbose=False):
         az = float(entry['az']) * 180.0/numpy.pi
         el = float(entry['el']) * 180.0/numpy.pi
         
-        azP, elP = applyPointingCorrection(az, el, theta, phi, psi, degrees=True)
+        azP, elP = apply_pointing_correction(az, el, theta, phi, psi, degrees=True)
         azP = ephem.degrees(azP * numpy.pi/180.0)
         elP = ephem.degrees(elP * numpy.pi/180.0)
         
@@ -350,7 +350,7 @@ def _rotationErrorFunctionPool(data, theta, phi, psis):
             correctedAz = ephem.degrees(data[i,2] * numpy.pi/180.0)
             correctedEl = ephem.degrees(data[i,3] * numpy.pi/180.0)
             
-            azP, elP = applyPointingCorrection(az, el, theta, phi, psi, degrees=True)
+            azP, elP = apply_pointing_correction(az, el, theta, phi, psi, degrees=True)
             azP = ephem.degrees(azP * numpy.pi/180.0)
             elP = ephem.degrees(elP * numpy.pi/180.0)
             

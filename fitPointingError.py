@@ -25,7 +25,7 @@ from aipy import coord
 from scipy.stats import pearsonr
 
 from lsl.common import stations
-from lsl.common.mcs import applyPointingCorrection
+from lsl.common.mcs import apply_pointing_correction
 
 from analysis import parse, fitDataWithRotation, _rotationErrorFunction
 
@@ -105,13 +105,13 @@ def main(args):
     # Split by frequency
     freqs = []
     for entry in data:
-        if entry['freqMHz'] not in freqs:
-            freqs.append( entry['freqMHz'] )
+        if entry['freq_MHz'] not in freqs:
+            freqs.append( entry['freq_MHz'] )
     groups = {}
     for freq in freqs:
         groups[freq] = []
         for entry in data:
-            if entry['freqMHz'] == freq:
+            if entry['freq_MHz'] == freq:
                 groups[freq].append( entry )
                 
     # Go!
@@ -221,7 +221,7 @@ def main(args):
             az = float(entry['az']) * 180.0/numpy.pi
             el = float(entry['el']) * 180.0/numpy.pi
             
-            azP, elP = applyPointingCorrection(az, el, bestTheta, bestPhi, bestPsi, degrees=True)
+            azP, elP = apply_pointing_correction(az, el, bestTheta, bestPhi, bestPsi, degrees=True)
             azP = ephem.degrees(azP * numpy.pi/180.0)
             elP = ephem.degrees(elP * numpy.pi/180.0)
             

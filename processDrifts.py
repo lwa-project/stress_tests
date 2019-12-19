@@ -164,16 +164,16 @@ def main(args):
     
     # Get the site
     if sta in (None, ''):
-        observer = stations.lwa1.getObserver()
+        observer = stations.lwa1.get_observer()
         if config['site'] == 'lwasv':
-            observer = stations.lwasv.getObserver()
+            observer = stations.lwasv.get_observer()
     else:
         if sta == 'lwa1':
             print "Data appears to be from LWA1"
-            observer = stations.lwa1.getObserver()
+            observer = stations.lwa1.get_observer()
         elif sta == 'lwasv':
             print "Data appears to be from LWA-SV"
-            observer = stations.lwasv.getObserver()
+            observer = stations.lwasv.get_observer()
         else:
             raise RuntimeError("Unknown LWA station name: %s" % sta)
             

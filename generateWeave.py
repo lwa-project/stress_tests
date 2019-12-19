@@ -109,9 +109,9 @@ def main(args):
         date = date[:subSecondSplit]
         
     # Get the site and set the date
-    observer = stations.lwa1.getObserver()
+    observer = stations.lwa1.get_observer()
     if config['site'] == 'lwasv':
-        observer = stations.lwasv.getObserver()
+        observer = stations.lwasv.get_observer()
     observer.date = date
     
     # Find the right source

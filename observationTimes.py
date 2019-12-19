@@ -116,9 +116,9 @@ def main(args):
             toUse = src
             
     # Get the observer
-    obs = stations.lwa1.getObserver()
+    obs = stations.lwa1.get_observer()
     if config['site'] == 'lwasv':
-        obs = stations.lwasv.getObserver()
+        obs = stations.lwasv.get_observer()
         
     if toUse is None:
         raise RuntimeError("Cannot find source '%s'" % srcName)
