@@ -190,8 +190,8 @@ def main(args):
         project.sessions[0].logScheduler = False
         project.sessions[0].logExecutive = False
         
-        obs = sdf.Stepped(target.name, "Az: %.1f degrees; El: %.1f degrees" % (az, el), start.strftime("UTC %Y/%m/%d %H:%M:%S"), flt, RADec=False)
-        stp = sdf.BeamStep(az, el, str(config['duration']), 37.9e6, 74.03e6, RADec=False)
+        obs = sdf.Stepped(target.name, "Az: %.1f degrees; El: %.1f degrees" % (az, el), start.strftime("UTC %Y/%m/%d %H:%M:%S"), flt, is_radec=False)
+        stp = sdf.BeamStep(az, el, str(config['duration']), 37.9e6, 74.03e6, is_radec=False)
         obs.append(stp)
         project.sessions[0].observations.append(obs)
         

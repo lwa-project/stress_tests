@@ -169,10 +169,10 @@ def main(args):
     project.sessions[0].logScheduler = False
     project.sessions[0].logExecutive = False
     
-    obs = sdf.Stepped(src.name, "Az: %.1f degrees; El: %.1f degrees" % (az, el), start.strftime("UTC %Y/%m/%d %H:%M:%S"), flt, RADec=True)
+    obs = sdf.Stepped(src.name, "Az: %.1f degrees; El: %.1f degrees" % (az, el), start.strftime("UTC %Y/%m/%d %H:%M:%S"), flt, is_radec=True)
     for i,(ra,dec) in enumerate(pnts):
         d = tstep
-        stp = sdf.BeamStep(ra, dec, d, 37.9e6, 74.03e6, RADec=True)
+        stp = sdf.BeamStep(ra, dec, d, 37.9e6, 74.03e6, is_radec=True)
         obs.append(stp)
     project.sessions[0].observations.append(obs)
     
