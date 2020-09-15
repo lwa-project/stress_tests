@@ -1,15 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
 """
 Given a file containing results of a pointing check, convert the data to a
 LaTeX table suitable for the "LWA1 Pointing Error and Correction" memo.
 
 Usage:
   makeTable.py <results file>
-
-$Rev$
-$LastChangedBy$
-$LastChangedDate$
 """
 
 import sys

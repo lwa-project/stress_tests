@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Given a results file, plot up the FWHM estimates as a function of zenith 
@@ -7,10 +6,6 @@ angle for the observations.
 
 Usage:
   plotFWHMEstimates.py <results file>
-
-$Rev$
-$LastChangedBy$
-$LastChangedDate$
 """
 
 import os

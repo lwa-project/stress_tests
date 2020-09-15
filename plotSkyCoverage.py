@@ -1,15 +1,10 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Given a results file, plot up the sky coverage for the observations.
 
 Usage:
   plotSkyCoverage.py <results file>
-
-$Rev$
-$LastChangedBy$
-$LastChangedDate$
 """
 
 import os

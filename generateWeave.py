@@ -1,15 +1,10 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Script to generate a basket weave SDF for a pointing/sensitivity check.
 
 Usage:
   generateWeave.py [OPTIONS] <source name> YYYY/MM/DD HH:MM:SS[.SS]
-
-$Rev$
-$LastChangedBy$
-$LastChangedDate$
 """
 
 import os
@@ -168,7 +163,7 @@ def main(args):
     # Make the SDF
     observer = sdf.Observer("Jayce Dowell", 99)
     session = sdf.Session("Pointing Weave Session Using %s" % srcs[toUse].name, config['sessionID'])
-    project = sdf.Project(observer, "DRX Pointing Weave", "COMJD", [session,])
+    project = sdf.Project(observer, "DRX Pointing Weave", "COMST", [session,])
     project.sessions[0].drxBeam = beam
     project.sessions[0].spcSetup = spc
     project.sessions[0].logScheduler = False
@@ -181,7 +176,7 @@ def main(args):
         obs.append(stp)
     project.sessions[0].observations.append(obs)
     
-    sdfName = 'COMJD_%s_%s_%s_B%i.sdf' % (start.strftime("%y%m%d"), start.strftime("%H%M"), src.name, beam)
+    sdfName = 'COMST_%s_%s_%s_B%i.sdf' % (start.strftime("%y%m%d"), start.strftime("%H%M"), src.name, beam)
     s = project.render()
     fh = open(sdfName, 'w')
     fh.write(s)

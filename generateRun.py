@@ -1,15 +1,10 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Script to generate a collection of SDFs to for a pointing/sensitivity check.
 
 Usage:
   generateRun.py [OPTIONS] <source name> YYYY/MM/DD HH:MM:SS[.SS]
-
-$Rev$
-$LastChangedBy$
-$LastChangedDate$
 """
 
 import os
@@ -179,7 +174,7 @@ def main(args):
             
         az = round(target.az*180.0/numpy.pi, 1) % 360.0
         el = round(target.alt*180.0/numpy.pi, 1)
-        sdfName = 'COMJD_%s_%s_%s_%i.sdf' % (start.strftime("%y%m%d"), start.strftime("%H%M"), srcs[toUse].name, beam)
+        sdfName = 'COMST_%s_%s_%s_%i.sdf' % (start.strftime("%y%m%d"), start.strftime("%H%M"), srcs[toUse].name, beam)
         
         print "Source: %s" % target.name
         print "  Az: %.1f" % az
@@ -189,7 +184,7 @@ def main(args):
         
         observer = sdf.Observer("Jayce Dowell", 99)
         session = sdf.Session("Pointing Check Session Using %s" % srcs[toUse].name, config['sessionID'][sdfCount % len(config['sessionID'])])
-        project = sdf.Project(observer, "DRX Pointing Checking", "COMJD", [session,])
+        project = sdf.Project(observer, "DRX Pointing Checking", "COMST", [session,])
         project.sessions[0].drxBeam = beam
         project.sessions[0].spcSetup = spc
         project.sessions[0].logScheduler = False

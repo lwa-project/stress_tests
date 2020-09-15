@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Script to generate a list of times that a given source is at a variety of 
@@ -7,10 +6,6 @@ elevations (30 to 90 degrees, plus transit) for a given UTC day.
 
 Usage:
   observationTimes.py <source name> YYYY/MM/DD
-
-$Rev$
-$LastChangedBy$
-$LastChangedDate$
 """
 
 import sys

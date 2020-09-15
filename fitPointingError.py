@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Given a file containing pointing error measurements, analyze the errors 
@@ -9,10 +8,6 @@ a plot.
 
 Usage:
   fitPointingError.py <results file>
-
-$Rev$
-$LastChangedBy$
-$LastChangedDate$
 """
 
 import os

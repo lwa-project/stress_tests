@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
 
 """
 Module to parse the results file for a collection of pointing checks.
-
-$Rev$
-$LastChangedBy$
-$LastChangedDate$
 """
 
 import aipy
@@ -16,7 +11,7 @@ from multiprocessing import Pool
 from scipy.optimize import leastsq
 
 from lsl.common import stations
-from lsl.sim.vis import srcs as simSrcs
+from lsl.sim.vis import SOURCES as simSrcs
 from lsl.common.mcs import apply_pointing_correction
 
 __version__ = "0.2"
