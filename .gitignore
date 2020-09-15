@@ -1,0 +1,5 @@
+# Data files
+*.hdf4
+
+# Python stuff
+*.pyc
