@@ -147,8 +147,8 @@ def main(args):
     tstep = timedelta(seconds=6, microseconds=0)	## Date step between the pointings
     if config['site'] == 'lwasv':
         beam  = 1									## Beam to use
-        spc   = [1024, 768]						## Spectrometer setup
-        flt   = 6									## DRX filter code
+        spc   = [1024, 1536]						## Spectrometer setup
+        flt   = 7									## DRX filter code
         tstep = timedelta(seconds=6, microseconds=0)	## Date step between the pointings
         
     # Setup the times
@@ -164,7 +164,7 @@ def main(args):
     observer = sdf.Observer("Jayce Dowell", 99)
     session = sdf.Session("Pointing Weave Session Using %s" % srcs[toUse].name, config['sessionID'])
     project = sdf.Project(observer, "DRX Pointing Weave", "COMST", [session,])
-    project.sessions[0].drxBeam = beam
+    project.sessions[0].drx_beam = beam
     project.sessions[0].spcSetup = spc
     project.sessions[0].logScheduler = False
     project.sessions[0].logExecutive = False

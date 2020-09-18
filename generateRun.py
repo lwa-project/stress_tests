@@ -161,8 +161,8 @@ def main(args):
     if config['site'] == 'lwasv':
         beams   = (1,1,1)								## Beams to use
         targets = (srcs[toUse], northPointing, southPointing)	## Target list
-        spc     = [1024, 3072]							## Spectrometer setup
-        flt     = 6									## DRX filter code
+        spc     = [1024, 6144]							## Spectrometer setup
+        flt     = 7									## DRX filter code
         tstep   = timedelta(seconds=86164, microseconds=90531)	## Date step between the pointings
         
     
@@ -185,7 +185,7 @@ def main(args):
         observer = sdf.Observer("Jayce Dowell", 99)
         session = sdf.Session("Pointing Check Session Using %s" % srcs[toUse].name, config['sessionID'][sdfCount % len(config['sessionID'])])
         project = sdf.Project(observer, "DRX Pointing Checking", "COMST", [session,])
-        project.sessions[0].drxBeam = beam
+        project.sessions[0].drx_beam = beam
         project.sessions[0].spcSetup = spc
         project.sessions[0].logScheduler = False
         project.sessions[0].logExecutive = False
