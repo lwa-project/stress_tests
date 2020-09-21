@@ -272,7 +272,7 @@ def main(args):
             
         # Plots and analysis
         fig = plt.figure()
-        fig.suptitle('Source: %s\n%s' % (name, rpos))
+        fig.suptitle('Source: %s @ %s\n%s' % (name, 'LWA1' if sta == 'LWA1' else 'LWA-SV', rpos))
         ## Dec
         x = dec[decCut]
         xPrime = numpy.linspace(x.min(), x.max(), 101)
