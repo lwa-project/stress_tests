@@ -75,6 +75,8 @@ def parseOptions(args):
             config['targetOnly'] = True
         elif opt in ('-s', '--session-id'):
             config['sessionID'] = [int(v) for v in value.split(',')]
+            while len(config['sessionID']) < 3:
+                config['sessionID'].append(config['sessionID'][-1]+1)
         else:
             assert False
             
