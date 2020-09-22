@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Script to generate a basket weave SDF for a pointing/sensitivity check.
@@ -7,88 +7,24 @@ Usage:
   generateWeave.py [OPTIONS] <source name> YYYY/MM/DD HH:MM:SS[.SS]
 """
 
-from __future__ import print_function, division
-
 import os
 import sys
 import ephem
 import numpy
-import getopt
+import argparse
 from datetime import datetime, timedelta
 
 from lsl.common import stations
 from lsl.common import sdf
+from lsl.misc import parser as aph
 
 from analysis import getSources
 
 
-def usage(exitCode=None):
-    print("""generateWeave.py - Script to generate a basketweave SDFs for testing the pointing.
-
-Usage: generateWeave.py [OPTIONS] SourceName YYYY/MM/DD HH:MM:SS[.SS]
-
-Options:
--h, --help                  Display this help information
--v, --lwassv                Compute for LWA-SV instead of LWA-1
--l, --list                  List valid sources and exit
--s, --session-id            Session IDs to use (Default = 1001)
-""")
-    
-    if exitCode is not None:
-        sys.exit(exitCode)
-    else:
-        return True
-
-
-def parseOptions(args):
-    config = {}
-    # Command line flags - default values
-    config['site'] = 'lwa1'
-    config['list'] = False
-    config['sessionID'] = 1001
-    
-    # Read in and process the command line flags
-    try:
-        opts, args = getopt.getopt(args, "hvls:", ["help", "lwasv", "list", "session-id="])
-    except getopt.GetoptError as err:
-        # Print help information and exit:
-        print(str(err)) # will print something like "option -a not recognized"
-        usage(exitCode=2)
-    
-    # Work through opts
-    for opt, value in opts:
-        if opt in ('-h', '--help'):
-            usage(exitCode=0)
-        elif opt in ('-v', '--lwasv'):
-            config['site'] = 'lwasv'
-        elif opt in ('-l', '--list'):
-            config['list'] = True
-        elif opt in ('-t', '--target-only'):
-            config['targetOnly'] = True
-        elif opt in ('-s', '--session-id'):
-            config['sessionID'] = int(value, 10)
-        else:
-            assert False
-            
-    # Add in arguments
-    config['args'] = args
-    
-    # Validate the arguments
-    config['args'] = args
-    if not config['list'] and len(config['args']) != 3:
-        raise RuntimeError("Must specify a source name and a UTC date/time")
-        
-    # Return configuration
-    return config
-
-
 def main(args):
-    # Parse the command line
-    config = parseOptions(args)
-    
     # Load in the sources and list if needed
     srcs = getSources()
-    if config['list']:
+    if args.list:
         print("Valid Sources:")
         print(" ")
         print("%-8s  %11s  %11s  %6s" % ("Name", "RA", "Dec", "Epoch"))
@@ -98,8 +34,10 @@ def main(args):
         sys.exit()
         
     # Read in the arguments
-    srcName = config['args'][0]
-    date = "%s %s" % (config['args'][1], config['args'][2])
+    if args.source is None or args.date is None or args.time is None:
+        raise RuntimeError("Need a source name and a UTC date/time")
+    srcName = args.source
+    date = "%s %s" % (args.date, args.time)
     date = date.replace('-', '/')
     subSecondSplit = date.rfind('.')
     if subSecondSplit != -1:
@@ -107,7 +45,7 @@ def main(args):
         
     # Get the site and set the date
     observer = stations.lwa1.get_observer()
-    if config['site'] == 'lwasv':
+    if args.lwasv:
         observer = stations.lwasv.get_observer()
     observer.date = date
     
@@ -147,7 +85,7 @@ def main(args):
     spc   = [1024, 1536]						## Spectrometer setup
     flt   = 7									## DRX filter code
     tstep = timedelta(seconds=6, microseconds=0)	## Date step between the pointings
-    if config['site'] == 'lwasv':
+    if args.lwasv:
         beam  = 1									## Beam to use
         spc   = [1024, 1536]						## Spectrometer setup
         flt   = 7									## DRX filter code
@@ -164,7 +102,7 @@ def main(args):
     
     # Make the SDF
     observer = sdf.Observer("Jayce Dowell", 99)
-    session = sdf.Session("Pointing Weave Session Using %s" % srcs[toUse].name, config['sessionID'])
+    session = sdf.Session("Pointing Weave Session Using %s" % srcs[toUse].name, args.session_id)
     project = sdf.Project(observer, "DRX Pointing Weave", "COMST", [session,])
     project.sessions[0].drx_beam = beam
     project.sessions[0].spcSetup = spc
@@ -187,5 +125,22 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    parser = argparse.ArgumentParser(
+        description='script to generate a basketweave SDFs for testing the pointing',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
+    parser.add_argument('source', type=str, nargs='?', 
+                        help='source name to generate run for')
+    parser.add_argument('date', type=aph.date, nargs='?',
+                        help='UTC date for the run as YYYY/MM/DD')
+    parser.add_argument('time', type=aph.time, nargs='?',
+                        help='UTC time for the run as HH:MM:SS[.SS]')
+    parser.add_argument('-v', '--lwasv', action='store_true',
+                        help='compute for LWA-SV instead of LWA1')
+    parser.add_argument('-l', '--list', action='store_true',
+                        help='list valid source names and exit')
+    parser.add_argument('-s', '--session-id', type=int, default=1001,
+                        help='session ID to use')
+    args = parser.parse_args()
+    main(args)
     
