@@ -186,7 +186,7 @@ def main(args):
                                         (s[1] == raCtr and s[2] == decCtr and i%2 == 1 and i < len(stp)//2)] 
         
         # Pull out the mean data value for each step that has been observed
-        m, ra, dec, pwr = [], [], [], []
+        m, ra, dec, pwr1, pwr2 = [], [], [], [], []
         for i in range(len(stp)):
             tStart = stp[i][0]
             try:
@@ -199,30 +199,38 @@ def main(args):
             ra.append( stp[i][1] )
             dec.append( stp[i][2] )
             try:
-                pwr.append( robust.mean(I2[valid]) )
+                pwr1.append( robust.mean(I1[valid]) )
             except:
-                pwr.append( numpy.mean(I2[valid]) )
-        m, ra, dec, pwr = numpy.array(m), numpy.array(ra), numpy.array(dec), numpy.array(pwr)
+                pwr1.append( numpy.mean(I1[valid]) )
+            try:
+                pwr2.append( robust.mean(I2[valid]) )
+            except:
+                pwr2.append( numpy.mean(I2[valid]) )
+        m, ra, dec, pwr1, pwr2 = numpy.array(m), numpy.array(ra), numpy.array(dec), numpy.array(pwr1), numpy.array(pwr2)
         
         # "Correct" for the ionosphere using the power as a function of time 
         # in the on-source reference
-        fnc = interp1d(m[onSrc], pwr[onSrc], kind='linear', bounds_error=False, fill_value=0.0)
-        pwr[ onSrc] /= fnc(m[ onSrc])
-        pwr[ raCut] /= fnc(m[ raCut])
-        pwr[decCut] /= fnc(m[decCut])
+        fnc1 = interp1d(m[onSrc], pwr1[onSrc], kind='linear', bounds_error=False, fill_value=0.0)
+        pwr1[ onSrc] /= fnc1(m[ onSrc])
+        pwr1[ raCut] /= fnc1(m[ raCut])
+        pwr1[decCut] /= fnc1(m[decCut])
+        fnc2 = interp1d(m[onSrc], pwr2[onSrc], kind='linear', bounds_error=False, fill_value=0.0)
+        pwr2[ onSrc] /= fnc2(m[ onSrc])
+        pwr2[ raCut] /= fnc2(m[ raCut])
+        pwr2[decCut] /= fnc2(m[decCut])
         
         # Weed out any bad points in the RA and dec cuts
         ## RA
         while True:
             for i,p in enumerate(raCut):
-                if not numpy.isfinite(pwr[p]):
+                if not numpy.isfinite(pwr1[p]) or not numpy.isfinite(pwr2[p]):
                     del raCut[i]
                     break
             break
         ## Dec
         while True:
             for i,p in enumerate(decCut):
-                if not numpy.isfinite(pwr[p]):
+                if not numpy.isfinite(pwr1[p]) or not numpy.isfinite(pwr2[p]):
                     del decCut[i]
                     break
             break
@@ -230,84 +238,91 @@ def main(args):
         # Plots and analysis
         fig = plt.figure()
         fig.suptitle('Source: %s @ %s\n%s' % (name, 'LWA1' if sta == 'lwa1' else 'LWA-SV', rpos))
-        ## Dec
-        x = dec[decCut]
-        xPrime = numpy.linspace(x.min(), x.max(), 101)
-        y = pwr[decCut]
-        p0 = (y.max()-y.min(), x.mean(), 2.0, y.min())
-        p, status = leastsq(err, p0, args=(x, y))
-        decOffset = ephem.degrees(str(p[1] - decCtr))
-        fwhmD = ephem.degrees(str(p[2]))
-        sefdMetricD = p[3] / p[0]
-        print('Dec')
-        print('  FWHM Estimate: %s' % fwhmD)
-        print('  Pointing Error: %s' % decOffset)
-        if toUseAIPY is None:
-            print('  1/(P1/P0 - 1): %.3f' % sefdMetricD)
-            if name == srcs[toUse].name:
-                    sefdEstimateD = numpy.nan
-        else:
-            try:
-                simSrcs[toUseAIPY].compute(observer, afreqs=f2.mean()/1e9)
-                srcFlux = simSrcs[toUseAIPY].jys
-            except TypeError:
-                f0, index, Flux0 = simSrcs[toUseAIPY].mfreq, simSrcs[toUseAIPY].index, simSrcs[toUseAIPY]._jys
-                srcFlux = Flux0 * (f2.mean()/1e9 / f0)**index
-            sefd = srcFlux*sefdMetricD / 1e3
-            print('  S / (P1/P0 - 1): %.3f kJy' % sefd)
-            if name == srcs[toUse].name:
-                    sefdEstimateD = sefd*1e3
-        ## RA
-        ax = fig.add_subplot(2, 1, 1)
-        ax.plot(x, y, linestyle='', marker='+', label='Data')
-        ax.plot(xPrime, func(p, xPrime), linestyle='-', label='Fit')
-        ax.vlines(decCtr, *ax.get_ylim(), linestyle=':')
-        ax.legend(loc=0)
-        ax.set_xlabel('Dec. [$^\\circ$]')
-        ax.set_ylabel('Power [arb., corr.]')
-        
-        x = ra[raCut]
-        xPrime = numpy.linspace(x.min(), x.max(), 101)
-        y = pwr[raCut]
-        p0 = (y.max()-y.min(), x.mean(), 2.0/15.0, y.min())
-        p, status = leastsq(err, p0, args=(x, y))
-        raOffset = ephem.hours(str(p[1] - raCtr))
-        fwhmR = ephem.degrees(str(p[2]*15 * numpy.cos(decCtr*numpy.pi/180.0)))
-        sefdMetricR = p[3] / p[0]
-        print('RA')
-        print('  FWHM Estimate: %s' % fwhmR)
-        print('  Pointing Error: %s' % raOffset)
-        if toUseAIPY is None:
-            print('  1/(P1/P0 - 1): %.3f' % sefdMetricR)
-            if name == srcs[toUse].name:
-                    sefdEstimateR = numpy.nan
-        else:
-            try:
-                simSrcs[toUseAIPY].compute(observer, afreqs=f2.mean()/1e9)
-                srcFlux = simSrcs[toUseAIPY].jys
-            except TypeError:
-                f0, index, Flux0 = simSrcs[toUseAIPY].mfreq, simSrcs[toUseAIPY].index, simSrcs[toUseAIPY]._jys
-                srcFlux = Flux0 * (f2.mean()/1e9 / f0)**index
-            sefd = srcFlux*sefdMetricR / 1e3
-            print('  S / (P1/P0 - 1): %.3f kJy' % sefd)
-            if name == srcs[toUse].name:
-                    sefdEstimateR = sefd*1e3
-        
-        ax = fig.add_subplot(2, 1, 2)
-        ax.plot(x, y, linestyle='', marker='+', label='Data')
-        ax.plot(xPrime, func(p, xPrime), linestyle='-', label='Fit')
-        ax.vlines(raCtr, *ax.get_ylim(), linestyle=':')
-        ax.legend(loc=0)
-        ax.set_xlabel('RA [$^h$]')
-        ax.set_ylabel('Power [arb., corr.]')
-        
+        ax11 = fig.add_subplot(2, 2, 1)
+        ax12 = fig.add_subplot(2, 2, 2)
+        ax21 = fig.add_subplot(2, 2, 3)
+        ax22 = fig.add_subplot(2, 2, 4)
+        for i,(ax1,ax2),f,pwr in zip((1,2), ((ax11,ax12), (ax21,ax22)), (f1.mean(), f2.mean()), (pwr1, pwr2)):
+            print("Tuning %i @ %.3f MHz" % (i+1, f/1e6))
+            
+            ## Dec
+            x = dec[decCut]
+            xPrime = numpy.linspace(x.min(), x.max(), 101)
+            y = pwr[decCut]
+            p0 = (y.max()-y.min(), x.mean(), 2.0, y.min())
+            p, status = leastsq(err, p0, args=(x, y))
+            decOffset = ephem.degrees(str(p[1] - decCtr))
+            fwhmD = ephem.degrees(str(p[2]))
+            sefdMetricD = p[3] / p[0]
+            print("  Dec")
+            print("    FWHM Estimate: %s" % fwhmD)
+            print("    Pointing Error: %s" % decOffset)
+            if toUseAIPY is None:
+                print("    1/(P1/P0 - 1): %.3f" % sefdMetricD)
+                if name == srcs[toUse].name:
+                        sefdEstimateD = numpy.nan
+            else:
+                try:
+                    simSrcs[toUseAIPY].compute(observer, afreqs=f2.mean()/1e9)
+                    srcFlux = simSrcs[toUseAIPY].jys
+                except TypeError:
+                    f0, index, Flux0 = simSrcs[toUseAIPY].mfreq, simSrcs[toUseAIPY].index, simSrcs[toUseAIPY]._jys
+                    srcFlux = Flux0 * (f2.mean()/1e9 / f0)**index
+                sefd = srcFlux*sefdMetricD / 1e3
+                print("    S / (P1/P0 - 1): %.3f kJy" % sefd)
+                if name == srcs[toUse].name:
+                        sefdEstimateD = sefd*1e3
+            ## RA
+            ax = ax1
+            ax.plot(x, y, linestyle='', marker='+', label='Data')
+            ax.plot(xPrime, func(p, xPrime), linestyle='-', label='Fit')
+            ax.vlines(decCtr, *ax.get_ylim(), linestyle=':')
+            ax.legend(loc=0)
+            ax.set_xlabel('Dec. [$^\\circ$]')
+            ax.set_ylabel('Power [arb., corr.]')
+            
+            x = ra[raCut]
+            xPrime = numpy.linspace(x.min(), x.max(), 101)
+            y = pwr[raCut]
+            p0 = (y.max()-y.min(), x.mean(), 2.0/15.0, y.min())
+            p, status = leastsq(err, p0, args=(x, y))
+            raOffset = ephem.hours(str(p[1] - raCtr))
+            fwhmR = ephem.degrees(str(p[2]*15 * numpy.cos(decCtr*numpy.pi/180.0)))
+            sefdMetricR = p[3] / p[0]
+            print("  RA")
+            print("    FWHM Estimate: %s" % fwhmR)
+            print("    Pointing Error: %s" % raOffset)
+            if toUseAIPY is None:
+                print("    1/(P1/P0 - 1): %.3f" % sefdMetricR)
+                if name == srcs[toUse].name:
+                        sefdEstimateR = numpy.nan
+            else:
+                try:
+                    simSrcs[toUseAIPY].compute(observer, afreqs=f2.mean()/1e9)
+                    srcFlux = simSrcs[toUseAIPY].jys
+                except TypeError:
+                    f0, index, Flux0 = simSrcs[toUseAIPY].mfreq, simSrcs[toUseAIPY].index, simSrcs[toUseAIPY]._jys
+                    srcFlux = Flux0 * (f2.mean()/1e9 / f0)**index
+                sefd = srcFlux*sefdMetricR / 1e3
+                print("    S / (P1/P0 - 1): %.3f kJy" % sefd)
+                if name == srcs[toUse].name:
+                        sefdEstimateR = sefd*1e3
+            
+            ax = ax2
+            ax.plot(x, y, linestyle='', marker='+', label='Data')
+            ax.plot(xPrime, func(p, xPrime), linestyle='-', label='Fit')
+            ax.vlines(raCtr, *ax.get_ylim(), linestyle=':')
+            ax.legend(loc=0)
+            ax.set_xlabel('RA [$^h$]')
+            ax.set_ylabel('Power [arb., corr.]')
+            
+            # Save
+            fwhmEstimate = ephem.degrees((fwhmD + fwhmR) / 2.0)
+            sefdEstimate = (sefdEstimateD + sefdEstimateR) / 2.0
+            finalResults.append( "%-6s %-19s %6.3f %-10s %-10s %-10s %10.3f %-10s" % \
+                                (srcs[toUse].name, datetime.utcfromtimestamp(tTransit).strftime("%Y/%m/%d %H:%M:%S"), f/1e6, zenithAngle, raOffset, decOffset, sefdEstimate, fwhmEstimate) )
+            
         plt.show()
-        
-        # Save
-        fwhmEstimate = ephem.degrees((fwhmD + fwhmR) / 2.0)
-        sefdEstimate = (sefdEstimateD + sefdEstimateR) / 2.0
-        finalResults.append( "%-6s %-19s %6.3f %-10s %-10s %-10s %10.3f %-10s" % \
-                            (srcs[toUse].name, datetime.utcfromtimestamp(tTransit).strftime("%Y/%m/%d %H:%M:%S"), f2.mean()/1e6, zenithAngle, raOffset, decOffset, sefdEstimate, fwhmEstimate) )
         
     # Final report
     sys.stderr.write("Source YYYY/MM/DD HH:MM:SS MHz    Z          errRA      errDec      SEFD      FWHM\n")
