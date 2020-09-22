@@ -1,3 +1,6 @@
+# Schedules
+*.sdf
+
 # Data files
 *.hdf4
 
