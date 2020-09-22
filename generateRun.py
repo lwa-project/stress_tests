@@ -7,6 +7,8 @@ Usage:
   generateRun.py [OPTIONS] <source name> YYYY/MM/DD HH:MM:SS[.SS]
 """
 
+from __future__ import print_function, division
+
 import os
 import sys
 import numpy
@@ -21,7 +23,7 @@ from analysis import getSources
 
 
 def usage(exitCode=None):
-    print """generateRun.py - Script to generate a collection of SDFs to for a pointing/
+    print("""generateRun.py - Script to generate a collection of SDFs to for a pointing/
 sensitivity check.
 
 Usage: generateRun.py [OPTIONS] SourceName YYYY/MM/DD HH:MM:SS[.SS]
@@ -36,8 +38,8 @@ Options:
                             offsets)
 -s, --session-id            Comma separated list of session IDs to use 
                             (Default = 1001, 1002, 1003)
-"""
-
+""")
+    
     if exitCode is not None:
         sys.exit(exitCode)
     else:
@@ -56,9 +58,9 @@ def parseOptions(args):
     # Read in and process the command line flags
     try:
         opts, args = getopt.getopt(args, "hvld:ts:", ["help", "lwasv", "list", "duration=", "target-only", "session-id="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # Print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage(exitCode=2)
     
     # Work through opts
@@ -99,12 +101,12 @@ def main(args):
     # Load in the sources and list if needed
     srcs = getSources()
     if config['list']:
-        print "Valid Sources:"
-        print " "
-        print "%-8s  %11s  %11s  %6s" % ("Name", "RA", "Dec", "Epoch")
-        print "-"*42
+        print("Valid Sources:")
+        print(" ")
+        print("%-8s  %11s  %11s  %6s" % ("Name", "RA", "Dec", "Epoch"))
+        print("-"*42)
         for nm,src in srcs.iteritems():
-            print "%-8s  %11s  %11s  %6s" % (src.name, src._ra, src._dec, src._epoch.tuple()[0])
+            print("%-8s  %11s  %11s  %6s" % (src.name, src._ra, src._dec, src._epoch.tuple()[0]))
         sys.exit()
         
     # Read in the arguments
@@ -150,9 +152,9 @@ def main(args):
     start = midPoint - timedelta(seconds=config['duration']/2)
     
     # Print out where we are at
-    print "Start of observations: %s" % start
-    print "Mid-point of observation: %s" % midPoint
-    print " "
+    print("Start of observations: %s" % start)
+    print("Mid-point of observation: %s" % midPoint)
+    print(" ")
     
     # Setup to deal with out LWA-SV is
     beams   = (2,3,4)								## Beams to use
@@ -176,13 +178,13 @@ def main(args):
             
         az = round(target.az*180.0/numpy.pi, 1) % 360.0
         el = round(target.alt*180.0/numpy.pi, 1)
-        sdfName = 'COMST_%s_%s_%s_%i.sdf' % (start.strftime("%y%m%d"), start.strftime("%H%M"), srcs[toUse].name, beam)
+        sdfName = 'COMST_%s_%s_%s_B%i.sdf' % (start.strftime("%y%m%d"), start.strftime("%H%M"), srcs[toUse].name, beam)
         
-        print "Source: %s" % target.name
-        print "  Az: %.1f" % az
-        print "  El: %.1f" % el
-        print "  Beam: %i" % beam
-        print "  SDF: %s" % sdfName
+        print("Source: %s" % target.name)
+        print("  Az: %.1f" % az)
+        print("  El: %.1f" % el)
+        print("  Beam: %i" % beam)
+        print("  SDF: %s" % sdfName)
         
         observer = sdf.Observer("Jayce Dowell", 99)
         session = sdf.Session("Pointing Check Session Using %s" % srcs[toUse].name, config['sessionID'][sdfCount % len(config['sessionID'])])

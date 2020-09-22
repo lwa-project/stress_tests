@@ -8,6 +8,8 @@ Usage:
   observationTimes.py <source name> YYYY/MM/DD
 """
 
+from __future__ import print_function, division
+
 import sys
 import ephem
 import numpy
@@ -20,7 +22,7 @@ from analysis import getSources
 
 
 def usage(exitCode=None):
-    print """observationTimes.py - Script to generate a list of times that a given 
+    print("""observationTimes.py - Script to generate a list of times that a given 
 source is at a variety of elevations (30 to 90 degrees, plus transit) for 
 a given UTC day.
 
@@ -33,8 +35,8 @@ Options:
 -l, --list                  List valid sources and exit
 -e, --elevations            Comma separated list of additional 
                             elevations in degrees to search for
-"""
-
+""")
+    
     if exitCode is not None:
         sys.exit(exitCode)
     else:
@@ -51,9 +53,9 @@ def parseOptions(args):
     # Read in and process the command line flags
     try:
         opts, args = getopt.getopt(args, "hvle:", ["help", "lwasv", "list", "elevations="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # Print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage(exitCode=2)
         
     # Work through opts
@@ -92,12 +94,12 @@ def main(args):
     # Load in the sources and list if needed
     srcs = getSources()
     if config['list']:
-        print "Valid Sources:"
-        print " "
-        print "%-8s  %11s  %11s  %6s" % ("Name", "RA", "Dec", "Epoch")
-        print "-"*42
-        for nm,src in srcs.iteritems():
-            print "%-8s  %11s  %11s  %6s" % (src.name, src._ra, src._dec, src._epoch.tuple()[0])
+        print("Valid Sources:")
+        print(" ")
+        print("%-8s  %11s  %11s  %6s" % ("Name", "RA", "Dec", "Epoch"))
+        print("-"*42)
+        for nm,src in srcs.items():
+            print("%-8s  %11s  %11s  %6s" % (src.name, src._ra, src._dec, src._epoch.tuple()[0]))
         sys.exit()
         
     # Break out what we need from the arguments
@@ -152,32 +154,32 @@ def main(args):
         tTransit = obs.prev_transit(srcs[toUse])
         
     # Report - rising then setting
-    print "%s on %s UTC:" % (srcs[toUse].name, date)
+    print("%s on %s UTC:" % (srcs[toUse].name, date))
     
-    print "  rising"
+    print("  rising")
     for el in config['elevations']:
         try:
             t = tRise[el]
             obs.date = t
             srcs[toUse].compute(obs)
             
-            print "    el: %4.1f degrees at %s (el: %4.1f, az: %5.1f)" % (el, t, srcs[toUse].alt*180/numpy.pi, srcs[toUse].az*180/numpy.pi)
+            print("    el: %4.1f degrees at %s (el: %4.1f, az: %5.1f)" % (el, t, srcs[toUse].alt*180/numpy.pi, srcs[toUse].az*180/numpy.pi))
         except KeyError:
             pass
             
-    print "  transit"
+    print("  transit")
     obs.date = tTransit
     srcs[toUse].compute(obs)
-    print "    el: %4.1f degrees at %s" % (srcs[toUse].alt*180/numpy.pi, tTransit)
+    print("    el: %4.1f degrees at %s" % (srcs[toUse].alt*180/numpy.pi, tTransit))
     
-    print "  setting"
+    print("  setting")
     for el in config['elevations'][::-1]:
         try:
             t = tSet[el]
             obs.date = t
             srcs[toUse].compute(obs)
             
-            print "    el: %4.1f degrees at %s (el: %4.1f, az: %5.1f)" % (el, t, srcs[toUse].alt*180/numpy.pi, srcs[toUse].az*180/numpy.pi)
+            print("    el: %4.1f degrees at %s (el: %4.1f, az: %5.1f)" % (el, t, srcs[toUse].alt*180/numpy.pi, srcs[toUse].az*180/numpy.pi))
         except KeyError:
             pass
 

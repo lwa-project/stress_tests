@@ -7,7 +7,7 @@ Usage:
   generateWeave.py [OPTIONS] <source name> YYYY/MM/DD HH:MM:SS[.SS]
 """
 
-from __future__ import division
+from __future__ import print_function, division
 
 import os
 import sys
@@ -23,7 +23,7 @@ from analysis import getSources
 
 
 def usage(exitCode=None):
-    print """generateWeave.py - Script to generate a basketweave SDFs for testing the pointing.
+    print("""generateWeave.py - Script to generate a basketweave SDFs for testing the pointing.
 
 Usage: generateWeave.py [OPTIONS] SourceName YYYY/MM/DD HH:MM:SS[.SS]
 
@@ -32,8 +32,8 @@ Options:
 -v, --lwassv                Compute for LWA-SV instead of LWA-1
 -l, --list                  List valid sources and exit
 -s, --session-id            Session IDs to use (Default = 1001)
-"""
-
+""")
+    
     if exitCode is not None:
         sys.exit(exitCode)
     else:
@@ -50,9 +50,9 @@ def parseOptions(args):
     # Read in and process the command line flags
     try:
         opts, args = getopt.getopt(args, "hvls:", ["help", "lwasv", "list", "session-id="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # Print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         usage(exitCode=2)
     
     # Work through opts
@@ -89,12 +89,12 @@ def main(args):
     # Load in the sources and list if needed
     srcs = getSources()
     if config['list']:
-        print "Valid Sources:"
-        print " "
-        print "%-8s  %11s  %11s  %6s" % ("Name", "RA", "Dec", "Epoch")
-        print "-"*42
+        print("Valid Sources:")
+        print(" ")
+        print("%-8s  %11s  %11s  %6s" % ("Name", "RA", "Dec", "Epoch"))
+        print("-"*42)
         for nm,src in srcs.iteritems():
-            print "%-8s  %11s  %11s  %6s" % (src.name, src._ra, src._dec, src._epoch.tuple()[0])
+            print("%-8s  %11s  %11s  %6s" % (src.name, src._ra, src._dec, src._epoch.tuple()[0]))
         sys.exit()
         
     # Read in the arguments
@@ -158,9 +158,9 @@ def main(args):
     start = midPoint - len(pnts)//2*tstep
     
     # Print out where we are at
-    print "Start of observations: %s" % start
-    print "Mid-point of observation: %s" % midPoint
-    print " "
+    print("Start of observations: %s" % start)
+    print("Mid-point of observation: %s" % midPoint)
+    print(" ")
     
     # Make the SDF
     observer = sdf.Observer("Jayce Dowell", 99)
@@ -183,7 +183,7 @@ def main(args):
     fh = open(sdfName, 'w')
     fh.write(s)
     fh.close()
-    print '->', sdfName
+    print('->', sdfName)
 
 
 if __name__ == "__main__":

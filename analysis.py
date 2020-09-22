@@ -3,6 +3,8 @@
 Module to parse the results file for a collection of pointing checks.
 """
 
+from __future__ import print_function, division
+
 import aipy
 import ephem
 import numpy
@@ -15,7 +17,6 @@ from lsl.sim.vis import SOURCES as simSrcs
 from lsl.common.mcs import apply_pointing_correction
 
 __version__ = "0.2"
-__revision__ = "$Rev$"
 __all__ = ['getSources', 'getAIPYSources', 'parse', 'fitDataWithRotation', 
            '__version__', '__revision__', '__all__']
 
@@ -128,7 +129,8 @@ def getAIPYSources():
     """
     
     newSrcs = {}
-    for name,src in simSrcs.iteritems():
+    for name in simSrcs.keys():
+        src = simSrcs[name]
         if name == 'Sun':
             newSrcs[name] = src
         elif name == 'Jupiter':
@@ -324,7 +326,7 @@ def _rotationErrorFunction(data, theta, phi, psi, verbose=False):
         
         sep = ephem.separation((entry['correctedAz'],entry['correctedEl']), (azP,elP))
         if verbose:
-            print "%s with a separation of %s" % (srcName, sep)
+            print("%s with a separation of %s" % (srcName, sep))
             
         error += sep**2
         count += 1
@@ -339,7 +341,7 @@ def _rotationErrorFunctionPool(data, theta, phi, psis):
         error = 0.0
         count = 0
         
-        for i in xrange(data.shape[0]):
+        for i in range(data.shape[0]):
             az = data[i,0]
             el = data[i,1]
             correctedAz = ephem.degrees(data[i,2] * numpy.pi/180.0)
