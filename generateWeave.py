@@ -7,6 +7,8 @@ Usage:
   generateWeave.py [OPTIONS] <source name> YYYY/MM/DD HH:MM:SS[.SS]
 """
 
+from __future__ import division
+
 import os
 import sys
 import ephem
@@ -127,15 +129,15 @@ def main(args):
     pnts = []
     ## First, declination
     for offset in numpy.linspace(-4.0, 4.0, 17):
-        pnts.append( (src.ra, ephem.degrees(src.dec+offset*numpy.pi/180)) )
+        pnts.append( (src._ra, ephem.degrees(src._dec+offset*numpy.pi/180)) )
     #pnts.extend(pnts)
     ## Now, RA
     for offset in numpy.linspace(-4.0, 4.0, 17):
         offset = offset / numpy.cos(src.dec)
-        pnts.append( (ephem.hours(src.ra+offset*numpy.pi/180), src.dec) )
+        pnts.append( (ephem.hours(src._ra+offset*numpy.pi/180), src._dec) )
     #pnts.extend(pnts)
     ## Finally the reference pointings
-    refs = [(src.ra,src.dec) for pnt in pnts]
+    refs = [(src._ra,src._dec) for pnt in pnts]
     ## Interleave
     pnts = [(r,p) for p,r in zip(pnts,refs)]
     pnts = [p for pair in pnts for p in pair]
@@ -153,7 +155,7 @@ def main(args):
         
     # Setup the times
     midPoint = datetime.strptime(date, "%Y/%m/%d %H:%M:%S")
-    start = midPoint - len(pnts)/2*tstep
+    start = midPoint - len(pnts)//2*tstep
     
     # Print out where we are at
     print "Start of observations: %s" % start
