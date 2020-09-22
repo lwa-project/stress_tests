@@ -87,8 +87,10 @@ def main(args):
         
         # Get the site
         if sta in (None, ''):
+            sta = 'lwa1'
             observer = stations.lwa1.get_observer()
             if args.lwasv:
+                sta = 'lwasv'
                 observer = stations.lwasv.get_observer()
         else:
             try:
