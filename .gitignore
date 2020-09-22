@@ -2,7 +2,7 @@
 *.sdf
 
 # Data files
-*.hdf4
+*.hdf5
 
 # Python stuff
 *.pyc
