@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Script to generate a collection of SDFs to for a pointing/sensitivity check.
@@ -7,100 +7,24 @@ Usage:
   generateRun.py [OPTIONS] <source name> YYYY/MM/DD HH:MM:SS[.SS]
 """
 
-from __future__ import print_function, division
-
 import os
 import sys
 import numpy
 import ephem
-import getopt
+import argparse
 from datetime import datetime, timedelta
 
 from lsl.common import stations
 from lsl.common import sdf
+from lsl.misc import parser as aph
 
 from analysis import getSources
 
 
-def usage(exitCode=None):
-    print("""generateRun.py - Script to generate a collection of SDFs to for a pointing/
-sensitivity check.
-
-Usage: generateRun.py [OPTIONS] SourceName YYYY/MM/DD HH:MM:SS[.SS]
-
-Options:
--h, --help                  Display this help information
--v, --lwassv                Compute for LWA-SV instead of LWA-1
--l, --list                  List valid sources and exit
--d, --duration              Observation length in seconds (Default = 7200)
--t, --target-only           Generate the SDF for the target source only 
-                            (Default = generate target plus north and south
-                            offsets)
--s, --session-id            Comma separated list of session IDs to use 
-                            (Default = 1001, 1002, 1003)
-""")
-    
-    if exitCode is not None:
-        sys.exit(exitCode)
-    else:
-        return True
-
-
-def parseOptions(args):
-    config = {}
-    # Command line flags - default values
-    config['site'] = 'lwa1'
-    config['list'] = False
-    config['duration'] = 7200
-    config['sessionID'] = [1001,1002,1003]
-    config['targetOnly'] = False
-    
-    # Read in and process the command line flags
-    try:
-        opts, args = getopt.getopt(args, "hvld:ts:", ["help", "lwasv", "list", "duration=", "target-only", "session-id="])
-    except getopt.GetoptError as err:
-        # Print help information and exit:
-        print(str(err)) # will print something like "option -a not recognized"
-        usage(exitCode=2)
-    
-    # Work through opts
-    for opt, value in opts:
-        if opt in ('-h', '--help'):
-            usage(exitCode=0)
-        elif opt in ('-v', '--lwasv'):
-            config['site'] = 'lwasv'
-        elif opt in ('-l', '--list'):
-            config['list'] = True
-        elif opt in ('-d', '--duration'):
-            config['duration'] = int(float(value))
-        elif opt in ('-t', '--target-only'):
-            config['targetOnly'] = True
-        elif opt in ('-s', '--session-id'):
-            config['sessionID'] = [int(v) for v in value.split(',')]
-            while len(config['sessionID']) < 3:
-                config['sessionID'].append(config['sessionID'][-1]+1)
-        else:
-            assert False
-            
-    # Add in arguments
-    config['args'] = args
-    
-    # Validate the arguments
-    config['args'] = args
-    if not config['list'] and len(config['args']) != 3:
-        raise RuntimeError("Must specify a source name and a UTC date/time")
-        
-    # Return configuration
-    return config
-
-
 def main(args):
-    # Parse the command line
-    config = parseOptions(args)
-    
     # Load in the sources and list if needed
     srcs = getSources()
-    if config['list']:
+    if args.list:
         print("Valid Sources:")
         print(" ")
         print("%-8s  %11s  %11s  %6s" % ("Name", "RA", "Dec", "Epoch"))
@@ -110,8 +34,10 @@ def main(args):
         sys.exit()
         
     # Read in the arguments
-    srcName = config['args'][0]
-    date = "%s %s" % (config['args'][1], config['args'][2])
+    if args.source is None or args.date is None or args.time is None:
+        raise RuntimeError("Need a source name and a UTC date/time")
+    srcName = args.source
+    date = "%s %s" % (args.date, args.time)
     date = date.replace('-', '/')
     subSecondSplit = date.rfind('.')
     if subSecondSplit != -1:
@@ -119,7 +45,7 @@ def main(args):
         
     # Get the site and set the date
     observer = stations.lwa1.get_observer()
-    if config['site'] == 'lwasv':
+    if args.lwasv:
         observer = stations.lwasv.get_observer()
     observer.date = date
     
@@ -149,7 +75,7 @@ def main(args):
     
     # Setup the times
     midPoint = datetime.strptime(date, "%Y/%m/%d %H:%M:%S")
-    start = midPoint - timedelta(seconds=config['duration']/2)
+    start = midPoint - timedelta(seconds=args.duration/2)
     
     # Print out where we are at
     print("Start of observations: %s" % start)
@@ -162,7 +88,7 @@ def main(args):
     spc     = [1024, 6144]							## Spectrometer setup
     flt     = 7									## DRX filter code
     tstep   = timedelta(0)							## Date step between the pointings
-    if config['site'] == 'lwasv':
+    if args.lwasv:
         beams   = (1,1,1)								## Beams to use
         targets = (srcs[toUse], northPointing, southPointing)	## Target list
         spc     = [1024, 6144]							## Spectrometer setup
@@ -173,7 +99,7 @@ def main(args):
     # Make the SDFs
     sdfCount = 0
     for beam,target in zip(beams, targets):
-        if config['targetOnly'] and target != srcs[toUse]:
+        if args.target_only and target != srcs[toUse]:
             continue
             
         az = round(target.az*180.0/numpy.pi, 1) % 360.0
@@ -187,7 +113,7 @@ def main(args):
         print("  SDF: %s" % sdfName)
         
         observer = sdf.Observer("Jayce Dowell", 99)
-        session = sdf.Session("Pointing Check Session Using %s" % srcs[toUse].name, config['sessionID'][sdfCount % len(config['sessionID'])])
+        session = sdf.Session("Pointing Check Session Using %s" % srcs[toUse].name, args.session_id[sdfCount % len(args.session_id)])
         project = sdf.Project(observer, "DRX Pointing Checking", "COMST", [session,])
         project.sessions[0].drx_beam = beam
         project.sessions[0].spcSetup = spc
@@ -195,7 +121,7 @@ def main(args):
         project.sessions[0].logExecutive = False
         
         obs = sdf.Stepped(target.name, "Az: %.1f degrees; El: %.1f degrees" % (az, el), start.strftime("UTC %Y/%m/%d %H:%M:%S"), flt, is_radec=False)
-        stp = sdf.BeamStep(az, el, str(config['duration']), 37.9e6, 74.03e6, is_radec=False)
+        stp = sdf.BeamStep(az, el, str(args.duration), 37.9e6, 74.03e6, is_radec=False)
         obs.append(stp)
         project.sessions[0].observations.append(obs)
         
@@ -209,5 +135,30 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    parser = argparse.ArgumentParser(
+        description='script to generate a collection of SDFs to for a pointing/sensitivity check',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
+    parser.add_argument('source', type=str, nargs='?', 
+                        help='source name to generate run for')
+    parser.add_argument('date', type=aph.date, nargs='?',
+                        help='UTC date for the run as YYYY/MM/DD')
+    parser.add_argument('time', type=aph.time, nargs='?',
+                        help='UTC time for the run as HH:MM:SS[.SS]')
+    parser.add_argument('-v', '--lwasv', action='store_true',
+                        help='compute for LWA-SV instead of LWA1')
+    parser.add_argument('-l', '--list', action='store_true',
+                        help='list valid source names and exit')
+    parser.add_argument('-d', '--duration', type=float, default=7200.0,
+                        help='observation length in seconds')
+    parser.add_argument('-t', '--target-only', action='store_true',
+                        help='only generate the SDF for the target source')
+    parser.add_argument('-s', '--session-id', type=aph.csv_int_list, default=[1001,1002,1003],
+                        help='comma separated list of session IDs to use')
+    args = parser.parse_args()
+    
+    while len(args.session_id) < 3:
+        args.session_id.append(args.session_id[-1]+1)
+        
+    main(args)
     
