@@ -9,8 +9,8 @@ Given a source name and a UTC date, generate a list of times the source
 is at transit and elevations of 30, 40, 50, 60, 70, 80, and 90 degrees 
 (when applicable).
 
-generateRun.py
---------------
+generateDrifts.py
+-----------------
 Given a source name and a time from observationTimes.py, generate a 
 collection of SDFs to carry out the run using the DR spectrometer mode.  
 The spectrometer mode is set up to deliver 1,024 channels and 6,144 
