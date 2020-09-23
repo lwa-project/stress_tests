@@ -99,9 +99,13 @@ def main(args):
         
         t = obs['time'][:]
         f1 = tuning1['freq'][:]
-        I1 = tuning1['XX'][:,:] + tuning1['YY'][:,:]
         f2 = tuning2['freq'][:]
-        I2 = tuning2['XX'][:,:] + tuning2['YY'][:,:]
+        try:
+            I1 = tuning1['I'][:,:]
+            I2 = tuning2['I'][:,:]
+        except KeyError:
+            I1 = tuning1['XX'][:,:] + tuning1['YY'][:,:]
+            I2 = tuning2['XX'][:,:] + tuning2['YY'][:,:]
         
         if t[0] < tStartPlot:
             tStartPlot = t[0]
@@ -194,8 +198,8 @@ def main(args):
     for name in data.keys():
         t = data[name]['t']
         f1 = data[name]['f1']
-        I1 = data[name]['I1']
         f2 = data[name]['f2']
+        I1 = data[name]['I1']
         I2 = data[name]['I2']
         
         # Select data that was actually recorded

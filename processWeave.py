@@ -79,10 +79,14 @@ def main(args):
         
         t = obs['time'][:]
         f1 = tuning1['freq'][:]
-        I1 = tuning1['XX'][:,:] + tuning1['YY'][:,:]
         f2 = tuning2['freq'][:]
-        I2 = tuning2['XX'][:,:] + tuning2['YY'][:,:]
-        
+        try:
+            I1 = tuning1['I'][:,:]
+            I2 = tuning2['I'][:,:]
+        except KeyError:
+            I1 = tuning1['XX'][:,:] + tuning1['YY'][:,:]
+            I2 = tuning2['XX'][:,:] + tuning2['YY'][:,:]
+            
         h.close()
         
         # Get the site
