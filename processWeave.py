@@ -245,7 +245,7 @@ def main(args):
         ax21 = fig.add_subplot(2, 2, 3)
         ax22 = fig.add_subplot(2, 2, 4)
         for i,(ax1,ax2),f,pwr in zip((1,2), ((ax11,ax12), (ax21,ax22)), (f1.mean(), f2.mean()), (pwr1, pwr2)):
-            print("Tuning %i @ %.3f MHz" % (i+1, f/1e6))
+            print("Tuning %i @ %.3f MHz" % (i, f/1e6))
             
             ## Dec
             x = dec[decCut]
@@ -265,16 +265,16 @@ def main(args):
                         sefdEstimateD = numpy.nan
             else:
                 try:
-                    simSrcs[toUseAIPY].compute(observer, afreqs=f2.mean()/1e9)
+                    simSrcs[toUseAIPY].compute(observer, afreqs=f/1e9)
                     srcFlux = simSrcs[toUseAIPY].jys
                 except TypeError:
                     f0, index, Flux0 = simSrcs[toUseAIPY].mfreq, simSrcs[toUseAIPY].index, simSrcs[toUseAIPY]._jys
-                    srcFlux = Flux0 * (f2.mean()/1e9 / f0)**index
+                    srcFlux = Flux0 * (f/1e9 / f0)**index
                 sefd = srcFlux*sefdMetricD / 1e3
                 print("    S / (P1/P0 - 1): %.3f kJy" % sefd)
                 if name == srcs[toUse].name:
                         sefdEstimateD = sefd*1e3
-            ## RA
+                        
             ax = ax1
             ax.plot(x, y, linestyle='', marker='+', label='Data')
             ax.plot(xPrime, func(p, xPrime), linestyle='-', label='Fit')
@@ -283,6 +283,7 @@ def main(args):
             ax.set_xlabel('Dec. [$^\\circ$]')
             ax.set_ylabel('Power [arb., corr.]')
             
+            ## RA
             x = ra[raCut]
             xPrime = numpy.linspace(x.min(), x.max(), 101)
             y = pwr[raCut]
@@ -300,11 +301,11 @@ def main(args):
                         sefdEstimateR = numpy.nan
             else:
                 try:
-                    simSrcs[toUseAIPY].compute(observer, afreqs=f2.mean()/1e9)
+                    simSrcs[toUseAIPY].compute(observer, afreqs=f/1e9)
                     srcFlux = simSrcs[toUseAIPY].jys
                 except TypeError:
                     f0, index, Flux0 = simSrcs[toUseAIPY].mfreq, simSrcs[toUseAIPY].index, simSrcs[toUseAIPY]._jys
-                    srcFlux = Flux0 * (f2.mean()/1e9 / f0)**index
+                    srcFlux = Flux0 * (f/1e9 / f0)**index
                 sefd = srcFlux*sefdMetricR / 1e3
                 print("    S / (P1/P0 - 1): %.3f kJy" % sefd)
                 if name == srcs[toUse].name:
