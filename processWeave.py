@@ -81,12 +81,16 @@ def main(args):
         f1 = tuning1['freq'][:]
         f2 = tuning2['freq'][:]
         try:
-            I1 = tuning1['I'][:,:]
-            I2 = tuning2['I'][:,:]
+            I1 = numpy.sqrt(tuning1['XY'][:,:]**2 + tuning1['YX'][:,:]**2)
+            I2 = numpy.sqrt(tuning2['XY'][:,:]**2 + tuning2['YX'][:,:]**2)
         except KeyError:
-            I1 = tuning1['XX'][:,:] + tuning1['YY'][:,:]
-            I2 = tuning2['XX'][:,:] + tuning2['YY'][:,:]
-            
+            try:
+                I1 = tuning1['I'][:,:]
+                I2 = tuning2['I'][:,:]
+            except KeyError:
+                I1 = tuning1['XX'][:,:] + tuning1['YY'][:,:]
+                I2 = tuning2['XX'][:,:] + tuning2['YY'][:,:]
+                
         h.close()
         
         # Get the site
