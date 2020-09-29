@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Given a file containing pointing error measurements, analyze the errors 
@@ -15,7 +15,7 @@ import sys
 import time
 import ephem
 import numpy
-import getopt
+import argparse
 from aipy import coord
 from scipy.stats import pearsonr
 
@@ -27,70 +27,16 @@ from analysis import parse, fitDataWithRotation, _rotationErrorFunction
 from matplotlib import pyplot as plt
 
 
-def usage(exitCode=None):
-    print """fitPointingError.py - Script that takes a text file containing pointing measurments
-and fits a rotation to the data.
-
-Usage: fitPointingError.py [OPTIONS] <text_file>
-
-Options:
--h, --help                  Display this help information
--v, --lwassv                Compute for LWA-SV instead of LWA-1
-"""
-
-    if exitCode is not None:
-        sys.exit(exitCode)
-    else:
-        return True
-
-
-def parseOptions(args):
-    config = {}
-    # Command line flags - default values
-    config['site'] = 'lwa1'
-    config['list'] = False
-    config['args'] = []
-    
-    # Read in and process the command line flags
-    try:
-        opts, args = getopt.getopt(args, "hv", ["help", "lwasv"])
-    except getopt.GetoptError, err:
-        # Print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
-        usage(exitCode=2)
-    
-    # Work through opts
-    for opt, value in opts:
-        if opt in ('-h', '--help'):
-            usage(exitCode=0)
-        elif opt in ('-v', '--lwasv'):
-            config['site'] = 'lwasv'
-        else:
-            assert False
-            
-    # Add in arguments
-    config['args'] = args
-    
-    # Validate the arguments
-    config['args'] = args
-    if len(config['args']) == 0:
-        raise RuntimeError("Must specify at least one file to load")
-        
-    # Return configuration
-    return config
-
-
 def main(args):
     # Parse the command line
-    config = parseOptions(args)
-    filenames = config['args']
+    filenames = args.filename
     
     # Get the station to use
     station = stations.lwa1
-    if config['site'] == 'lwasv':
+    if args.lwasv:
         station = stations.lwasv
-    print "Station: %s" % station.name
-    print " "
+    print("Station: %s" % station.name)
+    print(" ")
     
     # Load in the data
     data = []
@@ -110,19 +56,19 @@ def main(args):
                 groups[freq].append( entry )
                 
     # Go!
-    for freq,data in groups.iteritems():
+    for freq,data in groups.items():
         if len(groups) > 1:
-            print "Working on %.3f MHz" % freq
+            print("Working on %.3f MHz" % freq)
             
         ## Initial analysis
         t0 = time.time()
         bestRMS = _rotationErrorFunction(data, 0.0, 0.0, 0.0) * 180.0/numpy.pi
         t1 = time.time()
-        print "Level 0 (%.1f s):" % (t1-t0,)
-        print "  Theta: None applied"
-        print "  Phi:   None applied"
-        print "  Psi:   None applied"
-        print "  -> RMS: %.3f degrees" % bestRMS
+        print("Level 0 (%.1f s):" % (t1-t0,))
+        print("  Theta: None applied")
+        print("  Phi:   None applied")
+        print("  Psi:   None applied")
+        print("  -> RMS: %.3f degrees" % bestRMS)
         
         ## Fit the pointing correction
         t0 = time.time()
@@ -131,11 +77,11 @@ def main(args):
         psis = numpy.arange(-10.0, 10.0, 1.0)
         bestTheta, bestPhi, bestPsi, bestRMS = fitDataWithRotation(data, thetas, phis, psis, usePool=True)
         t1 = time.time()
-        print "Level 1 (%.1f s):" % (t1-t0,)
-        print "  Theta: %.1f degrees" % bestTheta
-        print "  Phi:   %.1f degrees" % bestPhi
-        print "  Psi:   %.1f degrees" % bestPsi
-        print "  -> RMS: %.3f degrees" % bestRMS
+        print("Level 1 (%.1f s):" % (t1-t0,))
+        print("  Theta: %.1f degrees" % bestTheta)
+        print("  Phi:   %.1f degrees" % bestPhi)
+        print("  Psi:   %.1f degrees" % bestPsi)
+        print("  -> RMS: %.3f degrees" % bestRMS)
         
         t0 = time.time()
         thetas = numpy.arange(bestTheta-4.0, bestTheta+4.0, 1.0)
@@ -143,11 +89,11 @@ def main(args):
         psis = numpy.arange(bestPsi-2.0, bestPsi+2.0, 0.5)
         bestTheta, bestPhi, bestPsi, bestRMS = fitDataWithRotation(data, thetas, phis, psis, usePool=True)
         t1 = time.time()
-        print "Level 2 (%.1f s):" % (t1-t0,)
-        print "  Theta: %.1f degrees" % bestTheta
-        print "  Phi:   %.1f degrees" % bestPhi
-        print "  Psi:   %.1f degrees" % bestPsi
-        print "  -> RMS: %.3f degrees" % bestRMS
+        print("Level 2 (%.1f s):" % (t1-t0,))
+        print("  Theta: %.1f degrees" % bestTheta)
+        print("  Phi:   %.1f degrees" % bestPhi)
+        print("  Psi:   %.1f degrees" % bestPsi)
+        print("  -> RMS: %.3f degrees" % bestRMS)
         
         t0 = time.time()
         thetas = numpy.arange(bestTheta-2.0, bestTheta+2.0, 0.1)
@@ -155,11 +101,11 @@ def main(args):
         psis = numpy.arange(bestPsi-1.0, bestPsi+1.0, 0.1)
         bestTheta, bestPhi, bestPsi, bestRMS = fitDataWithRotation(data, thetas, phis, psis, usePool=True)
         t1 = time.time()
-        print "Level 3 (%.1f s):" % (t1-t0,)
-        print "  Theta: %.1f degrees" % bestTheta
-        print "  Phi:   %.1f degrees" % bestPhi
-        print "  Psi:   %.1f degrees" % bestPsi
-        print "  -> RMS: %.3f degrees" % bestRMS
+        print("Level 3 (%.1f s):" % (t1-t0,))
+        print("  Theta: %.1f degrees" % bestTheta)
+        print("  Phi:   %.1f degrees" % bestPhi)
+        print("  Psi:   %.1f degrees" % bestPsi)
+        print("  -> RMS: %.3f degrees" % bestRMS)
         
         ## Plot
         fig = plt.figure()
@@ -187,11 +133,11 @@ def main(args):
         zeniths = numpy.array(zeniths)
         errors = numpy.array(errors)
         fit = numpy.polyfit(zeniths, errors, 1)
-        print "Raw Offsets:"
-        print "  Mean Error: %.3f degrees" % errors.mean()
-        print "  RMS Error:  %.3f degrees" % numpy.sqrt((errors**2).mean())
-        print "  Error Slope:   %.3f degrees/degree" % fit[0]
-        print "  Error R-Value: %.3f" % pearsonr(zeniths, errors)[0]
+        print("Raw Offsets:")
+        print("  Mean Error: %.3f degrees" % errors.mean())
+        print("  RMS Error:  %.3f degrees" % numpy.sqrt((errors**2).mean()))
+        print("  Error Slope:   %.3f degrees/degree" % fit[0])
+        print("  Error R-Value: %.3f" % pearsonr(zeniths, errors)[0])
         
         ### Figure 2 (a) and 2(b) - Pointing Error broken down into RA and Dec.
         for entry in data:
@@ -235,11 +181,11 @@ def main(args):
         zeniths = numpy.array(zeniths)
         errors = numpy.array(errors)
         fit = numpy.polyfit(zeniths, errors, 1)
-        print "Corrected Offsets:"
-        print "  Mean Error: %.3f degrees" % errors.mean()
-        print "  RMS Error:  %.3f degrees" % numpy.sqrt((errors**2).mean())
-        print "  Error Slope:   %.3f degrees/degree" % fit[0]
-        print "  Error R-Value: %.3f" % pearsonr(zeniths, errors)[0]
+        print("Corrected Offsets:")
+        print("  Mean Error: %.3f degrees" % errors.mean())
+        print("  RMS Error:  %.3f degrees" % numpy.sqrt((errors**2).mean()))
+        print("  Error Slope:   %.3f degrees/degree" % fit[0])
+        print("  Error R-Value: %.3f" % pearsonr(zeniths, errors)[0])
         
         fig.tight_layout()
         
@@ -247,5 +193,14 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    parser = argparse.ArgumentParser(
+        description='script that takes a text file containing pointing measurments and fits a rotation to the data',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
+    parser.add_argument('filename', type=str, nargs='+',
+                        help='text file to analyze')
+    parser.add_argument('-v', '--lwasv', action='store_true',
+                        help='use LWA-SV instead of LWA1 if the station is not specified in the HDF5 file')
+    args = parser.parse_args()
+    main(args)
     
