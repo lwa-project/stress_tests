@@ -333,8 +333,13 @@ def main(args):
             finalResults.append( "%-6s %-19s %6.3f %-10s %-10s %-10s %10.3f %-10s" % \
                                 (srcs[toUse].name, datetime.utcfromtimestamp(tTransit).strftime("%Y/%m/%d %H:%M:%S"), f/1e6, zenithAngle, raOffset, decOffset, sefdEstimate, fwhmEstimate) )
             
-        plt.show()
-        
+        if args.headless:
+            figname = os.path.basename(filename)
+            figname = os.path.splitext(figname)[0]
+            fig.savefig(figname+'.png')
+        else:
+            plt.show()
+            
     # Final report
     sys.stderr.write("Source YYYY/MM/DD HH:MM:SS MHz    Z          errRA      errDec      SEFD      FWHM\n")
     for line in finalResults:
@@ -351,6 +356,13 @@ if __name__ == "__main__":
                         help='HDF5 file to analyze')
     parser.add_argument('-v', '--lwasv', action='store_true',
                         help='use LWA-SV instead of LWA1 if the station is not specified in the HDF5 file')
+    parser.add_argument('--headless', action='store_true',
+                        help='run in headless mode and save figures to disk')
     args = parser.parse_args()
+    if args.headless:
+        import matplotlib
+        matplotlib.use('Agg')
+    from matplotlib import pyplot as plt
+    
     main(args)
     
