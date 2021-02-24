@@ -7,14 +7,19 @@ transit.
 
 import os
 import sys
+import math
 import argparse
 import subprocess
 from datetime import datetime, timedelta
 from socket import gethostname
 
+from lsl.common import stations
+
 from lwa_mcs.tp import schedule_sdfs
 from lwa_mcs.utils import schedule_at_command
 from lwa_mcs.exc import cancel_observation
+
+from analysis import getSources
 
 
 # Obsever and project information
@@ -36,8 +41,18 @@ def main(args):
                                                    stop.strftime('%Y/%m/%d %H:%M:%S')))
     print("  Window is %.1f min long" % ((stop-start).total_seconds()/60.0,))
     
+    # Find the mid-point
     mid = start + (stop-start)/2
     print("  Mid-point is %s" % (mid.strftime('%Y/%m/%d %H:%M:%S'),))
+    
+    # Tweak the mid-point to get closer to transit
+    cyga = getSources()['CygA']
+    site = stations.lwasv if _IS_LWASV else stations.lwa1
+    site.date = mid.strftime('%Y/%m/%d %H:%M:%S')
+    cyga.compute(site)
+    diff = cyga.ra - site.sidereal_time()
+    mid += timedelta(seconds=int(round(diff*12*3600 / math.pi)))
+    print("  Transit is %s" % (mid.strftime('%Y/%m/%d %H:%M:%S'),))
     
     # Load in the next session ID
     try:
@@ -76,8 +91,7 @@ def main(args):
     if not args.dry_run:
         os.rename(filename, newname)
     else:
-        #os.unlink(filename)
-        pass
+        os.unlink(filename)
     filenames = [newname,]
     session_id += 1
     
