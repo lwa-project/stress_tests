@@ -119,7 +119,10 @@ def main(args):
         project.sessions[0].spcSetup = spc
         project.sessions[0].logScheduler = False
         project.sessions[0].logExecutive = False
-        
+        if args.ucf_username is not None:
+            project.sessions[0].data_return_method = 'UCF'
+            project.sessions[0].ucf_username = args.ucf_username
+            
         obs = sdf.Stepped(target.name, "Az: %.1f degrees; El: %.1f degrees" % (az, el), start.strftime("UTC %Y/%m/%d %H:%M:%S"), flt, is_radec=False)
         stp = sdf.BeamStep(az, el, str(args.duration), 37.9e6, 74.03e6, is_radec=False)
         obs.append(stp)
@@ -155,6 +158,8 @@ if __name__ == "__main__":
                         help='only generate the SDF for the target source')
     parser.add_argument('-s', '--session-id', type=aph.csv_int_list, default=[1001,1002,1003],
                         help='comma separated list of session IDs to use')
+    parser.add_argument('-u', '--ucf-username', type=str,
+                        help='optional UCF username for data copy')
     args = parser.parse_args()
     
     while len(args.session_id) < 3:

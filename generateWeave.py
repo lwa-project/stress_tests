@@ -108,7 +108,10 @@ def main(args):
     project.sessions[0].spcSetup = spc
     project.sessions[0].logScheduler = False
     project.sessions[0].logExecutive = False
-    
+    if args.ucf_username is not None:
+        project.sessions[0].data_return_method = 'UCF'
+        project.sessions[0].ucf_username = args.ucf_username
+        
     obs = sdf.Stepped(src.name, "Az: %.1f degrees; El: %.1f degrees" % (az, el), start.strftime("UTC %Y/%m/%d %H:%M:%S"), flt, is_radec=True)
     for i,(ra,dec) in enumerate(pnts):
         d = tstep
@@ -141,6 +144,8 @@ if __name__ == "__main__":
                         help='list valid source names and exit')
     parser.add_argument('-s', '--session-id', type=int, default=1001,
                         help='session ID to use')
+    parser.add_argument('-u', '--ucf-username', type=str,
+                        help='optional UCF username for data copy')
     args = parser.parse_args()
     main(args)
     
