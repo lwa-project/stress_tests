@@ -153,7 +153,7 @@ def main(args):
     if not _IS_LWASV:
         print("Scheduling 'at' commands")
         
-        tINI = start + timedelta(minutes=1)
+        tINI = start + timedelta(minutes=2)
         tINI = tINI.replace(second=0, microsecond=0)
         atCommands.append( (tINI, '/home/op1/MCS/sch/INIdp.sh') )
         
