@@ -13,7 +13,8 @@ import subprocess
 from datetime import datetime, timedelta
 from socket import gethostname
 
-from lsl.common import stations
+from lsl.common import stations, sdf, sdfADP
+from lsl.common.mcs import mjdmpm_to_datetime
 
 from lwa_mcs.tp import schedule_sdfs
 from lwa_mcs.utils import schedule_at_command
@@ -87,6 +88,18 @@ def main(args):
     filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
     newname = os.path.join(sdf_dir, filename)
     
+    # Parse it to get an "official" start/stop time
+    parser = sdf
+    if _IS_LWASV:
+        parser = sdfADP
+    test_plan = parser.parse_sdf(filename)
+    test_beam = test_plan.sessions[0].drx_beam
+    test_start = mjdmpm_to_datetime(test_plan.sessions[0].observations[0].mjd,
+                                    test_plan.sessions[0].observations[0].mpm)
+    test_stop = mjdmpm_to_datetime(test_plan.sessions[0].observations[-1].mjd,
+                                   test_plan.sessions[0].observations[-1].mpm \
+                                   + test_plan.sessions[0].observations[-1].dur)
+    
     # Move it into place
     if not args.dry_run:
         os.rename(filename, newname)
@@ -135,13 +148,48 @@ def main(args):
         fh.write("%s %i\n" % (_PROJECT_ID, session_id))
         fh.close()
         
+    atCommands = []
+    atIDs = []
+    if not _IS_LWASV:
+        print("Scheduling 'at' commands")
+        
+        tINI = start + timedelta(minutes=1)
+        tINI = tINI.replace(second=0, microsecond=0)
+        atCommands.append( (tINI, '/home/op1/MCS/sch/INIdp.sh') )
+        
+        tTBN = stop - timedelta(minutes=1)
+        tTBN = tTBN.replace(second=0, microsecond=0)
+        atCommands.append( (tTBN, '/home/op1/MCS/sch/startTBN_split.sh') )
+        
+        ## Implement the commands
+        for atcmd in atCommands:
+            if not args.dry_run:
+                atID = schedule_at_command(*atcmd)
+            else:
+                atID = -1
+            atIDs.append(atID)
+            
     print("Done, saving log")
-    if not args.dry_run:
+    if args.dry_run:
+        rpt = []
+        for atcmd,id in zip(atCommands,atIDs):
+            if id != -1:
+                id = " (#%i)" % id
+            else:
+                id = ''
+            rpt.append( [atcmd[0], "%s%s" % (atcmd[1], id)] )
+        rpt.append( [test_start, f"stress tests starts on beam {test_beam}"] )
+        rpt.append( [test_stop, f"stress tests stops on beam {test_beam}"] )
+        rpt.sort()
+        
         fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'runtime.log'), 'a')
         fh.write("Completed Scheduling for UTC %s to %s\n" % (start.strftime('%Y/%m/%d %H:%M:%S'), 
                                                               stop.strftime('%Y/%m/%d %H:%M:%S')))
         fh.write("  Command:\n")
         fh.write("    %s\n" % (' '.join(cmd),))
+        fh.write("  Timeline:\n")
+        for t,info in rpt:
+            fh.write("    %s - %s\n" % (t.strftime("%Y/%m/%d %H:%M:%S"), info))
         fh.close()
 
 
