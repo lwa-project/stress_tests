@@ -13,7 +13,7 @@ import subprocess
 from datetime import datetime, timedelta
 from socket import gethostname
 
-from lsl.common import stations, sdf, sdfADP
+from lsl.common import stations, sdf, sdfADP, busy
 from lsl.common.mcs import mjdmpm_to_datetime
 
 from lwa_mcs.tp import schedule_sdfs
@@ -85,8 +85,8 @@ def main(args):
     output = output.decode()
     output = output.split('\n')
     filename = output[-2].split(None, 1)[1]
-    filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
     newname = os.path.join(sdf_dir, filename)
+    filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
     
     # Parse it to get an "official" start/stop time
     parser = sdf
@@ -170,7 +170,7 @@ def main(args):
             atIDs.append(atID)
             
     print("Done, saving log")
-    if args.dry_run:
+    if not args.dry_run:
         rpt = []
         for atcmd,id in zip(atCommands,atIDs):
             if id != -1:
