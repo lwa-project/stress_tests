@@ -4,6 +4,7 @@ import os
 import sys
 import glob
 import stat
+import shutil
 import getpass
 import subprocess
 from socket import gethostname
@@ -46,7 +47,7 @@ def main(args):
             continue
             
         ## Convert
-        cmd = [os.path.join(COM_HDF5_DIR, 'drspec2hdf5.py'), '-m', meta, data]
+        cmd = [os.path.join(COM_HDF5_DIR, 'drspec2hdf.py'), '-m', meta, data]
         try:
             subprocess.check_call(cmd, cwd=SEARCH_DIR)
         except subprocess.CalledProcessError as e:
@@ -72,10 +73,11 @@ def main(args):
             fh.write(output)
         figname = os.path.basename(data)
         figname = os.path.splitext(figname)[0]
-        figname += '.png'
+        figname += '-waterfall.png'
+        newname = os.path.join(SEARCH_DIR, figname)
         figname = os.path.join(SELF_DIR, figname)
         try:
-            os.rename(figname, figname.replace(SELF_DIR, SEARCH_DIR))
+            shutil.move(figname, newname)
         except OSError:
             print(f"WARNING: Failed to move output image {os.path.basename(figname)}")
             
