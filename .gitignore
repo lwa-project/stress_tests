@@ -3,6 +3,8 @@
 
 # Data files
 *.hdf5
+metric-lwa1
+metric-lwasv
 
 # Python stuff
 *.pyc

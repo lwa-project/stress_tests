@@ -29,12 +29,12 @@ def main(args):
     
     for meta in metadata:
         ## Load in the metadata
-        is_lwasv = False
-        try:
+        if metabundleADP.is_valid(meta):
             smd = metabundleADP.get_session_metadata(meta)
             is_lwasv = True
-        except:
+        else:
             smd = metabundle.get_session_metadata(meta)
+            is_lwasv = False
         print(f"Working on {os.path.basename(meta)} from {'LWA-SV' if is_lwasv else 'LWA1'}")
         
         ## Make sure the data are ready
@@ -82,8 +82,12 @@ def main(args):
             print(f"WARNING: Failed to move output image {os.path.basename(figname)}")
             
         ## Upload to the OpScreen page
-        ## ???
-        
+        cmd = [os.path.join(SELF_DIR, 'uploadSEFD.py'),]
+        try:
+            subprocess.check_call(cmd, cwd=SELF_DIR)
+        except subprocess.CalledProcessError:
+            print("WARNING: failed to upload results to the OpScreen page")
+            
         ## Cleanup
         for filename in (meta, data):
             try:
