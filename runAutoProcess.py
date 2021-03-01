@@ -45,6 +45,9 @@ def main(args):
         if not bool(os.stat(data).st_mode & stat.S_IROTH):
             print(f"WARNING: Data file not finished copying for {os.path.basename(meta)}, skipping")
             continue
+        if os.path.getsize(data) == 0:
+            print(f"WARNING: Data file for {os.path.basename(meta)} appears to be empty, skipping")
+            continue
             
         ## Convert
         cmd = [os.path.join(COM_HDF5_DIR, 'drspec2hdf.py'), '-m', meta, data]
