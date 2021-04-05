@@ -16,6 +16,8 @@ import argparse
 from datetime import datetime
 from scipy.optimize import leastsq
 
+from astropy.time import Time as AstroTime
+
 from lsl import astro
 from lsl.common import stations
 from lsl.statistics import robust
@@ -96,6 +98,16 @@ def main(args):
         tuning2 = obs.get('Tuning2', None)
         
         t = obs['time'][:]
+        try:
+            if obs['time'].attrs['format'] != 'unix' or obs['time'].attrs['scale'] != 'utc':
+                t = [AstroTime(*v, format=obs['time'].attrs['format'], scale=obs['time'].attrs['scale']) for v in t]
+                t = [v.utc.unix for v in t]
+                t = numpy.array(t)
+                
+            else:
+                t = t["int"] + t["frac"]
+        except (KeyError, ValueError):
+            pass
         f1 = tuning1['freq'][:]
         f2 = tuning2['freq'][:]
         try:
@@ -104,7 +116,7 @@ def main(args):
         except KeyError:
             I1 = tuning1['XX'][:,:] + tuning1['YY'][:,:]
             I2 = tuning2['XX'][:,:] + tuning2['YY'][:,:]
-        
+            
         if t[0] < tStartPlot:
             tStartPlot = t[0]
         
