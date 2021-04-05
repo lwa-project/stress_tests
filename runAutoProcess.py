@@ -61,7 +61,7 @@ def main(args):
         cmd = [os.path.join(SELF_DIR, 'processWeave.py'), '--headless', data+'-waterfall.hdf5']
         try:
             output = subprocess.check_output(cmd, cwd=SELF_DIR)
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as e:
             print(f"WARNING:  Failed to analyze HDF5 file {os.path.basename(meta)} - {e}")
             continue
         output = output.decode()
