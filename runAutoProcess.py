@@ -85,12 +85,16 @@ def main(args):
             print(f"WARNING: Failed to move output image {os.path.basename(figname)}")
             
         ## Upload to the OpScreen page
-        cmd = [os.path.join(SELF_DIR, 'uploadSEFD.py'),]
-        try:
-            subprocess.check_call(cmd, cwd=SELF_DIR)
-        except subprocess.CalledProcessError:
-            print("WARNING: failed to upload results to the OpScreen page")
-            
+        for script in ('uploadSEFD.py', 'influxSEFD.py', 'influxSEFD_SV.py'):
+            cmd = [os.path.join(SELF_DIR, script),]
+            if not os.path.exists(cmd[0]):
+                continue
+                
+            try:
+                subprocess.check_call(cmd, cwd=SELF_DIR)
+            except subprocess.CalledProcessError as e:
+                print(f"WARNING: failed to upload results to the OpScreen page with {script} - {e}")
+                
         ## Cleanup
         for filename in (meta, data):
             try:
