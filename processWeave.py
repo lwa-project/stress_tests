@@ -81,8 +81,16 @@ def main(args):
         
         t = obs['time'][:]
         try:
-            if obs['time'].attrs['format'] != 'unix' or obs['time'].attrs['scale'] != 'utc':
-                t = [AstroTime(*v, format=obs['time'].attrs['format'], scale=obs['time'].attrs['scale']) for v in t]
+            fmt = obs['time'].attrs['format']
+            scl = obs['time'].attrs['scale']
+            try:
+                fmt = fmt.decode()
+                scl = scl.decode()
+            except AttributeError:
+                pass
+                
+            if fmt != 'unix' or scl != 'utc':
+                t = [AstroTime(*v, format=fmt, scale=scl) for v in t]
                 t = [v.utc.unix for v in t]
                 t = numpy.array(t)
                 
