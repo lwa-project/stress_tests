@@ -148,11 +148,15 @@ def main(args):
         fh.write("%s %i\n" % (_PROJECT_ID, session_id))
         fh.close()
         
+    print("Scheduling 'at' commands")
     atCommands = []
     atIDs = []
-    if not _IS_LWASV:
-        print("Scheduling 'at' commands")
+    if _IS_LWASV:
+        tDRX = stop - timedelta(minutes=1)
+        tDRX = tDRX.replace(second=0, microsecond=0)
+        atCommands.append( (tDRX, '/home/op1/MCS/exec/set_default_freqs.sh') )
         
+    else:
         tINI = start + timedelta(minutes=2)
         tINI = tINI.replace(second=0, microsecond=0)
         atCommands.append( (tINI, '/home/op1/MCS/sch/INIdp.sh') )
@@ -161,14 +165,14 @@ def main(args):
         tTBN = tTBN.replace(second=0, microsecond=0)
         atCommands.append( (tTBN, '/home/op1/MCS/sch/startTBN_split.sh') )
         
-        ## Implement the commands
-        for atcmd in atCommands:
-            if not args.dry_run:
-                atID = schedule_at_command(*atcmd)
-            else:
-                atID = -1
-            atIDs.append(atID)
-            
+    ## Implement the commands
+    for atcmd in atCommands:
+        if not args.dry_run:
+            atID = schedule_at_command(*atcmd)
+        else:
+            atID = -1
+        atIDs.append(atID)
+        
     print("Done, saving log")
     if not args.dry_run:
         rpt = []
