@@ -140,8 +140,8 @@ if __name__ == "__main__":
                         help='UTC time for the run as HH:MM:SS[.SS]')
     parser.add_argument('-v', '--lwasv', action='store_true',
                         help='compute for LWA-SV instead of LWA1')
-    parser.add_argument('-f', '--freqs', type=float, nargs=2, default=[37.9e6, 74.03e6],
-                        help='center frequencies for the two tunings in Hz')
+    parser.add_argument('-f', '--freqs', type=aph.positive_float, nargs=2, default=[37.9, 74.03],
+                        help='center frequencies for the two tunings in MHz')
     parser.add_argument('-l', '--list', action='store_true',
                         help='list valid source names and exit')
     parser.add_argument('-s', '--session-id', type=int, default=1001,
@@ -149,5 +149,7 @@ if __name__ == "__main__":
     parser.add_argument('-u', '--ucf-username', type=str,
                         help='optional UCF username for data copy')
     args = parser.parse_args()
+    args.freqs[0] *= 1e6
+    args.freqs[1] *= 1e6
     main(args)
     
