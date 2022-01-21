@@ -29,7 +29,7 @@ def main(args):
         print(" ")
         print("%-8s  %11s  %11s  %6s" % ("Name", "RA", "Dec", "Epoch"))
         print("-"*42)
-        for nm,src in srcs.iteritems():
+        for nm,src in srcs.items():
             print("%-8s  %11s  %11s  %6s" % (src.name, src._ra, src._dec, src._epoch.tuple()[0]))
         sys.exit()
         
@@ -124,7 +124,7 @@ def main(args):
             project.sessions[0].ucf_username = args.ucf_username
             
         obs = sdf.Stepped(target.name, "Az: %.1f degrees; El: %.1f degrees" % (az, el), start.strftime("UTC %Y/%m/%d %H:%M:%S"), flt, is_radec=False)
-        stp = sdf.BeamStep(az, el, str(args.duration), 37.9e6, 74.03e6, is_radec=False)
+        stp = sdf.BeamStep(az, el, str(args.duration), args.freqs[0], args.freqs[1], is_radec=False)
         obs.append(stp)
         project.sessions[0].observations.append(obs)
         
@@ -150,6 +150,8 @@ if __name__ == "__main__":
                         help='UTC time for the run as HH:MM:SS[.SS]')
     parser.add_argument('-v', '--lwasv', action='store_true',
                         help='compute for LWA-SV instead of LWA1')
+    parser.add_argument('-f', '--freqs', type=float, nargs=2, default=[37.9e6, 74.03e6],
+                        help='center frequencies for the two tunings in Hz')
     parser.add_argument('-l', '--list', action='store_true',
                         help='list valid source names and exit')
     parser.add_argument('-d', '--duration', type=float, default=7200.0,
