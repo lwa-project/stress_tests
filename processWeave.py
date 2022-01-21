@@ -101,8 +101,8 @@ def main(args):
         f1 = tuning1['freq'][:]
         f2 = tuning2['freq'][:]
         try:
-            I1 = numpy.sqrt(tuning1['XY'][:,:]**2 + tuning1['YX'][:,:]**2)
-            I2 = numpy.sqrt(tuning2['XY'][:,:]**2 + tuning2['YX'][:,:]**2)
+            I1 = numpy.sqrt(tuning1['XY_real'][:,:]**2 + tuning1['XY_imag'][:,:]**2)
+            I2 = numpy.sqrt(tuning2['XY_real'][:,:]**2 + tuning2['XY_imag'][:,:]**2)
         except KeyError:
             try:
                 I1 = tuning1['I'][:,:]
