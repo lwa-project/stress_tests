@@ -29,7 +29,7 @@ def main(args):
         print(" ")
         print("%-8s  %11s  %11s  %6s" % ("Name", "RA", "Dec", "Epoch"))
         print("-"*42)
-        for nm,src in srcs.iteritems():
+        for nm,src in srcs.items():
             print("%-8s  %11s  %11s  %6s" % (src.name, src._ra, src._dec, src._epoch.tuple()[0]))
         sys.exit()
         
@@ -115,7 +115,7 @@ def main(args):
     obs = sdf.Stepped(src.name, "Az: %.1f degrees; El: %.1f degrees" % (az, el), start.strftime("UTC %Y/%m/%d %H:%M:%S"), flt, is_radec=True)
     for i,(ra,dec) in enumerate(pnts):
         d = tstep
-        stp = sdf.BeamStep(ra, dec, d, 37.9e6, 74.03e6, is_radec=True)
+        stp = sdf.BeamStep(ra, dec, d, args.freqs[0], args.freqs[1], is_radec=True)
         obs.append(stp)
     project.sessions[0].observations.append(obs)
     
@@ -140,6 +140,8 @@ if __name__ == "__main__":
                         help='UTC time for the run as HH:MM:SS[.SS]')
     parser.add_argument('-v', '--lwasv', action='store_true',
                         help='compute for LWA-SV instead of LWA1')
+    parser.add_argument('-f', '--freqs', type=aph.positive_float, nargs=2, default=[37.9, 74.03],
+                        help='center frequencies for the two tunings in MHz')
     parser.add_argument('-l', '--list', action='store_true',
                         help='list valid source names and exit')
     parser.add_argument('-s', '--session-id', type=int, default=1001,
@@ -147,5 +149,7 @@ if __name__ == "__main__":
     parser.add_argument('-u', '--ucf-username', type=str,
                         help='optional UCF username for data copy')
     args = parser.parse_args()
+    args.freqs[0] *= 1e6
+    args.freqs[1] *= 1e6
     main(args)
     
