@@ -87,7 +87,7 @@ def main(args):
     print("Mid-point of observation: %s" % midPoint)
     print(" ")
     
-    # Setup to deal with out LWA-SV is
+    # Setup to deal with how LWA-SV is
     beams   = (2,3,4)								## Beams to use
     targets = (srcs[toUse], northPointing, southPointing)	## Target list
     spc     = [1024, 6144]							## Spectrometer setup
