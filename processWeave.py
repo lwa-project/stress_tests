@@ -78,7 +78,9 @@ def main(args):
         
         tuning1 = obs.get('Tuning1', None)
         tuning2 = obs.get('Tuning2', None)
-        
+        if tuning2 is None:
+            tuning2 = tuning1
+            
         t = obs['time'][:]
         try:
             fmt = obs['time'].attrs['format']
@@ -127,10 +129,19 @@ def main(args):
                 pass
             if sta == 'lwa1':
                 print("Data appears to be from LWA1")
+                sta_name = 'LWA1'
                 observer = stations.lwa1.get_observer()
             elif sta == 'lwasv':
                 print("Data appears to be from LWA-SV")
+                sta_name = 'LWA-SV'
                 observer = stations.lwasv.get_observer()
+            elif sta == 'ovrolwa':
+                print("Data appears to be from OVRO-LWA")
+                sta_name = 'OVRO-LWA'
+                station = stations.lwa1
+                station.name = 'OVRO-LWA'
+                station.lat, station.lon, station.elev = ('37.23977727', '-118.2816667', 1182.89)
+                observer = station.get_observer()
             else:
                 raise RuntimeError("Unknown LWA station name: %s" % sta)
                 
@@ -267,12 +278,14 @@ def main(args):
             
         # Plots and analysis
         fig = plt.figure()
-        fig.suptitle('Source: %s @ %s\n%s' % (name, 'LWA1' if sta == 'lwa1' else 'LWA-SV', rpos))
+        fig.suptitle('Source: %s @ %s\n%s' % (name, sta_name, rpos))
         ax11 = fig.add_subplot(2, 2, 1)
         ax12 = fig.add_subplot(2, 2, 2)
         ax21 = fig.add_subplot(2, 2, 3)
         ax22 = fig.add_subplot(2, 2, 4)
         for i,(ax1,ax2),f,pwr in zip((1,2), ((ax11,ax12), (ax21,ax22)), (f1.mean(), f2.mean()), (pwr1, pwr2)):
+            if i == 2 and tuning1 is tuning2:
+                continue
             print("Tuning %i @ %.3f MHz" % (i, f/1e6))
             
             ## Dec
@@ -374,8 +387,11 @@ if __name__ == "__main__":
         )
     parser.add_argument('filename', type=str, nargs='+', 
                         help='HDF5 file to analyze')
-    parser.add_argument('-v', '--lwasv', action='store_true',
+    sgroup = parser.add_mutually_exclusive_group(required=False)
+    sgroup.add_argument('-v', '--lwasv', action='store_true',
                         help='use LWA-SV instead of LWA1 if the station is not specified in the HDF5 file')
+    sgroup.add_argument('-o', '--ovrolwa', action='store_true',
+                        help='use OVRO-LWA instead of LWA1 if the station is not specified in the HDF5 file')
     parser.add_argument('--headless', action='store_true',
                         help='run in headless mode and save figures to disk')
     args = parser.parse_args()

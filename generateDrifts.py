@@ -47,6 +47,11 @@ def main(args):
     observer = stations.lwa1.get_observer()
     if args.lwasv:
         observer = stations.lwasv.get_observer()
+    elif args.ovrolwa:
+        station = stations.lwa1
+        station.name = 'OVRO-LWA'
+        station.lat, station.lon, station.elev = ('37.23977727', '-118.2816667', 1182.89)
+        observer = station.get_observer()
     observer.date = date
     
     # Find the right source
@@ -148,8 +153,11 @@ if __name__ == "__main__":
                         help='UTC date for the run as YYYY/MM/DD')
     parser.add_argument('time', type=aph.time, nargs='?',
                         help='UTC time for the run as HH:MM:SS[.SS]')
-    parser.add_argument('-v', '--lwasv', action='store_true',
+    sgroup = parser.add_mutually_exclusive_group(required=False)
+    sgroup.add_argument('-v', '--lwasv', action='store_true',
                         help='compute for LWA-SV instead of LWA1')
+    sgroup.add_argument('-o', '--ovrolwa', action='store_true',
+                        help='compute for OVRO-LWA instead of LWA1')
     parser.add_argument('-f', '--freqs', type=aph.positive_float, nargs=2, default=[37.9, 74.03],
                         help='center frequencies for the two tunings in MHz')
     parser.add_argument('-l', '--list', action='store_true',
