@@ -100,21 +100,7 @@ def main(args):
                 t = t["int"] + t["frac"]
         except (KeyError, ValueError):
             pass
-        f1 = tuning1['freq'][:]
-        f2 = tuning2['freq'][:]
-        try:
-            I1 = numpy.sqrt(tuning1['XY_real'][:,:]**2 + tuning1['XY_imag'][:,:]**2)
-            I2 = numpy.sqrt(tuning2['XY_real'][:,:]**2 + tuning2['XY_imag'][:,:]**2)
-        except KeyError:
-            try:
-                I1 = tuning1['I'][:,:]
-                I2 = tuning2['I'][:,:]
-            except KeyError:
-                I1 = tuning1['XX'][:,:] + tuning1['YY'][:,:]
-                I2 = tuning2['XX'][:,:] + tuning2['YY'][:,:]
-                
-        h.close()
-        
+            
         # Get the site
         if sta in (None, ''):
             sta = 'lwa1'
@@ -145,6 +131,24 @@ def main(args):
             else:
                 raise RuntimeError("Unknown LWA station name: %s" % sta)
                 
+        f1 = tuning1['freq'][:]
+        f2 = tuning2['freq'][:]
+        try:
+            if sta_name == 'OVRO-LWA':
+                ## Crude catch to for OVRO-LWA to always run as I or XX+YY
+                raise KeyError
+            I1 = numpy.sqrt(tuning1['XY_real'][:,:]**2 + tuning1['XY_imag'][:,:]**2)
+            I2 = numpy.sqrt(tuning2['XY_real'][:,:]**2 + tuning2['XY_imag'][:,:]**2)
+        except KeyError:
+            try:
+                I1 = tuning1['I'][:,:]
+                I2 = tuning2['I'][:,:]
+            except KeyError:
+                I1 = tuning1['XX'][:,:] + tuning1['YY'][:,:]
+                I2 = tuning2['XX'][:,:] + tuning2['YY'][:,:]
+                
+        h.close()
+        
         # Load in the sources and find the right one
         srcs = getSources()
         simSrcs = getAIPYSources()
