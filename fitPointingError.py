@@ -35,6 +35,10 @@ def main(args):
     station = stations.lwa1
     if args.lwasv:
         station = stations.lwasv
+    elif sta == 'ovrolwa':
+        station = stations.lwa1
+        station.name = 'OVRO-LWA'
+        station.lat, station.lon, station.elev = ('37.23977727', '-118.2816667', 1182.89)
     print("Station: %s" % station.name)
     print(" ")
     
@@ -199,8 +203,11 @@ if __name__ == "__main__":
         )
     parser.add_argument('filename', type=str, nargs='+',
                         help='text file to analyze')
-    parser.add_argument('-v', '--lwasv', action='store_true',
+    sgroup = parser.add_mutually_exclusive_group(required=False)
+    sgroup.add_argument('-v', '--lwasv', action='store_true',
                         help='use LWA-SV instead of LWA1 if the station is not specified in the HDF5 file')
+    sgroup.add_argument('-o', '--ovrolwa', action='store_true',
+                        help='use OVRO-LWA instead of LWA1 if the station is not specified in the HDF5 file')
     args = parser.parse_args()
     main(args)
     

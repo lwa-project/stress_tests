@@ -96,7 +96,9 @@ def main(args):
             
         tuning1 = obs.get('Tuning1', None)
         tuning2 = obs.get('Tuning2', None)
-        
+        if tuning2 is None:
+            tuning2 = tuning1
+            
         t = obs['time'][:]
         try:
             fmt = obs['time'].attrs['format']
@@ -138,6 +140,12 @@ def main(args):
         if args.lwasv:
             sta = 'lwasv'
             observer = stations.lwasv.get_observer()
+        elif args.ovrolwa:
+            sta = 'ovrolwa'
+            station = stations.lwa1
+            station.name = 'OVRO-LWA'
+            station.lat, station.lon, station.elev = ('37.23977727', '-118.2816667', 1182.89)
+            observer = station.get_observer()
     else:
         try:
             sta = sta.decode()
@@ -149,6 +157,13 @@ def main(args):
         elif sta == 'lwasv':
             print("Data appears to be from LWA-SV")
             observer = stations.lwasv.get_observer()
+        elif sta == 'ovrolwa':
+            print("Data appears to be from OVRO-LWA")
+            sta_name = 'OVRO-LWA'
+            station = stations.lwa1
+            station.name = 'OVRO-LWA'
+            station.lat, station.lon, station.elev = ('37.23977727', '-118.2816667', 1182.89)
+            observer = station.get_observer()
         else:
             raise RuntimeError("Unknown LWA station name: %s" % sta)
             
@@ -321,33 +336,35 @@ def main(args):
             if name == srcs[toUse].name:
                 sefdEstimate1 = sefd*1e3
                 
-        print('  Tuning 2 @ %.2f MHz' % (f2.mean()/1e6,))
-        print('    FWHM: %.2f s (%.2f deg)' % (obsFWHM2, obsFWHM2/3600.*15.*numpy.cos(srcs[toUse]._dec)))
-        print('    Observed Transit: %s' % datetime.utcfromtimestamp(obsTransit2))
-        print('    Expected Transit: %s' % datetime.utcfromtimestamp(tTransit))
-        print('    -> Difference: %.2f s' % diff2)
-        if toUseAIPY is None:
-            print('    1/(P1/P0 - 1): %.3f' % sefdMetric2)
-        else:
-            try:
-                simSrcs[toUseAIPY].compute(observer, afreqs=f1.mean()/1e9)
-                srcFlux = simSrcs[toUseAIPY].jys
-            except TypeError:
-                f0, index, Flux0 = simSrcs[toUseAIPY].mfreq, simSrcs[toUseAIPY].index, simSrcs[toUseAIPY]._jys
-                srcFlux = Flux0 * (f2.mean()/1e9 / f0)**index
-            sefd = srcFlux*sefdMetric2 / 1e3
-            print('    S / (P1/P0 - 1): %.3f kJy' % sefd)
-            if name == srcs[toUse].name:
-                sefdEstimate2 = sefd*1e3
+        if tuning2 is not tuning1:
+            print('  Tuning 2 @ %.2f MHz' % (f2.mean()/1e6,))
+            print('    FWHM: %.2f s (%.2f deg)' % (obsFWHM2, obsFWHM2/3600.*15.*numpy.cos(srcs[toUse]._dec)))
+            print('    Observed Transit: %s' % datetime.utcfromtimestamp(obsTransit2))
+            print('    Expected Transit: %s' % datetime.utcfromtimestamp(tTransit))
+            print('    -> Difference: %.2f s' % diff2)
+            if toUseAIPY is None:
+                print('    1/(P1/P0 - 1): %.3f' % sefdMetric2)
+            else:
+                try:
+                    simSrcs[toUseAIPY].compute(observer, afreqs=f1.mean()/1e9)
+                    srcFlux = simSrcs[toUseAIPY].jys
+                except TypeError:
+                    f0, index, Flux0 = simSrcs[toUseAIPY].mfreq, simSrcs[toUseAIPY].index, simSrcs[toUseAIPY]._jys
+                    srcFlux = Flux0 * (f2.mean()/1e9 / f0)**index
+                sefd = srcFlux*sefdMetric2 / 1e3
+                print('    S / (P1/P0 - 1): %.3f kJy' % sefd)
+                if name == srcs[toUse].name:
+                    sefdEstimate2 = sefd*1e3
         print(' ')
         
         # Plot
         ax1.plot(smartMod(t-tStartPlot, SIDEREAL_DAY), I1, label="%s" % name)
         ax1.plot(smartMod(t-tStartPlot, SIDEREAL_DAY), obsFit1, linestyle=':')
 
-        ax2.plot(smartMod(t-tStartPlot, SIDEREAL_DAY), I2, label="%s" % name)		
-        ax2.plot(smartMod(t-tStartPlot, SIDEREAL_DAY), obsFit2, linestyle=':')
-        
+        if tuning2 is not tuning1:
+            ax2.plot(smartMod(t-tStartPlot, SIDEREAL_DAY), I2, label="%s" % name)		
+            ax2.plot(smartMod(t-tStartPlot, SIDEREAL_DAY), obsFit2, linestyle=':')
+            
     ylim1 = ax1.get_ylim()
     ax1.vlines(tTransit-tStartPlot, *ylim1, linestyle='--', label='Expected Transit')
     ax1.set_ylim(ylim1)
@@ -356,13 +373,14 @@ def main(args):
     ax1.set_xlabel('Elapsed Time [s]')
     ax1.set_ylabel('Power [arb.]')
     
-    ylim2 = ax2.get_ylim()
-    ax2.vlines(tTransit-tStartPlot, *ylim2, linestyle='--', label='Expected Transit')
-    ax2.set_ylim(ylim2)
-    ax2.legend(loc=0)
-    ax2.set_title('%.2f MHz' % (f2.mean()/1e6,))
-    ax2.set_xlabel('Elapsed Time [s]')
-    ax2.set_ylabel('Power [arb.]')
+    if tuning2 is not tuning1:
+        ylim2 = ax2.get_ylim()
+        ax2.vlines(tTransit-tStartPlot, *ylim2, linestyle='--', label='Expected Transit')
+        ax2.set_ylim(ylim2)
+        ax2.legend(loc=0)
+        ax2.set_title('%.2f MHz' % (f2.mean()/1e6,))
+        ax2.set_xlabel('Elapsed Time [s]')
+        ax2.set_ylabel('Power [arb.]')
     
     # Compute the dec. offset
     dataSet1 = (f1.mean(), raOffsets1, decPowers1, fwhmEstimates1, sefdEstimate1)
@@ -424,8 +442,11 @@ if __name__ == "__main__":
         )
     parser.add_argument('filename', type=str, nargs='+', 
                         help='HDF5 file to analyze')
-    parser.add_argument('-v', '--lwasv', action='store_true',
+    sgroup = parser.add_mutually_exclusive_group(required=False)
+    sgroup.add_argument('-v', '--lwasv', action='store_true',
                         help='use LWA-SV instead of LWA1 if the station is not specified in the HDF5 file')
+    sgroup.add_argument('-o', '--ovrolwa', action='store_true',
+                        help='use OVRO-LWA instead of LWA1 if the station is not specified in the HDF5 file')
     parser.add_argument('--headless', action='store_true',
                         help='run in headless mode and save figures to disk')
     args = parser.parse_args()
