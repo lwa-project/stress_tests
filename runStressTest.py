@@ -76,7 +76,7 @@ def main(args):
             os.mkdir(sdf_dir)
             
     # Generate the run and get the filename
-    cmd = ['./generateWeave.py', '-s', str(session_id), '-u', 'stress_tests']
+    cmd = [sys.executable, './generateWeave.py', '-s', str(session_id), '-u', 'stress_tests']
     if _IS_LWASV:
         cmd.append('-v')
     cmd.extend(['CygA', mid.strftime("%Y/%m/%d"), mid.strftime("%H:%M:%S")])
