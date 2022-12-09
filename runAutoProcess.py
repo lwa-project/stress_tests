@@ -50,7 +50,7 @@ def main(args):
             continue
             
         ## Convert
-        cmd = [os.path.join(COM_HDF5_DIR, 'drspec2hdf.py'), '-m', meta, data]
+        cmd = [sys.executable, os.path.join(COM_HDF5_DIR, 'drspec2hdf.py'), '-m', meta, data]
         try:
             subprocess.check_call(cmd, cwd=SEARCH_DIR)
         except subprocess.CalledProcessError as e:
@@ -58,7 +58,7 @@ def main(args):
             continue
             
         ## Analyze and report
-        cmd = [os.path.join(SELF_DIR, 'processWeave.py'), '--headless', data+'-waterfall.hdf5']
+        cmd = [sys.executable, os.path.join(SELF_DIR, 'processWeave.py'), '--headless', data+'-waterfall.hdf5']
         try:
             output = subprocess.check_output(cmd, cwd=SELF_DIR)
         except subprocess.CalledProcessError as e:
@@ -86,7 +86,7 @@ def main(args):
             
         ## Upload to the OpScreen page
         for script in ('uploadSEFD.py', 'influxSEFD.py', 'influxSEFD_SV.py'):
-            cmd = [os.path.join(SELF_DIR, script),]
+            cmd = [sys.executable, os.path.join(SELF_DIR, script),]
             if not os.path.exists(cmd[0]):
                 continue
                 
