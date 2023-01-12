@@ -1,0 +1,10 @@
+aipy
+astropy
+h5py
+lsl
+lwa_auth
+lwa_mcs
+matplotlib
+numpy
+pyephem
+scipy
