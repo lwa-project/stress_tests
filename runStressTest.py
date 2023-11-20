@@ -13,7 +13,7 @@ import subprocess
 from datetime import datetime, timedelta
 from socket import gethostname
 
-from lsl.common import stations, sdf, sdfADP, busy
+from lsl.common import stations, sdf, sdfADP, sdfNDP, busy
 from lsl.common.mcs import mjdmpm_to_datetime
 
 from lwa_mcs.tp import schedule_sdfs
@@ -32,6 +32,7 @@ _PROJECT_ID = 'COMST'
 
 # Station information
 _IS_LWASV = gethostname().lower().find('lwasv') != -1
+_IS_LWANA = gethostname().lower().find('lwana') != -1
 
 
 def main(args):
@@ -48,7 +49,11 @@ def main(args):
     
     # Tweak the mid-point to get closer to transit
     cyga = getSources()['CygA']
-    site = stations.lwasv if _IS_LWASV else stations.lwa1
+    site = stations.lwa1
+    if _IS_LWASV:
+        site = stations.lwasv
+    elif _IS_LWANA:
+        site = stations.lwana
     site.date = mid.strftime('%Y/%m/%d %H:%M:%S')
     cyga.compute(site)
     diff = cyga.ra - site.sidereal_time()
@@ -79,6 +84,8 @@ def main(args):
     cmd = [sys.executable, './generateWeave.py', '-s', str(session_id), '-u', 'stress_tests']
     if _IS_LWASV:
         cmd.append('-v')
+    elif _IS_LWANA:
+        cmd.append('-n')
     cmd.extend(['CygA', mid.strftime("%Y/%m/%d"), mid.strftime("%H:%M:%S")])
     output = subprocess.check_output(cmd, stderr=subprocess.DEVNULL,
                                      cwd=os.path.abspath(os.path.dirname(__file__)))
@@ -92,6 +99,8 @@ def main(args):
     parser = sdf
     if _IS_LWASV:
         parser = sdfADP
+    elif _IS_LWANA:
+        parser = sdfNDP
     test_plan = parser.parse_sdf(filename)
     test_beam = test_plan.sessions[0].drx_beam
     test_start = mjdmpm_to_datetime(test_plan.sessions[0].observations[0].mjd,
@@ -151,7 +160,7 @@ def main(args):
     print("Scheduling 'at' commands")
     atCommands = []
     atIDs = []
-    if _IS_LWASV:
+    if _IS_LWASV or _IS_LWANA:
         tDRX = stop - timedelta(minutes=1)
         tDRX = tDRX.replace(second=0, microsecond=0)
         atCommands.append( (tDRX, '/home/op1/MCS/exec/set_default_freqs.sh') )

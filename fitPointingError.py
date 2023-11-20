@@ -35,6 +35,8 @@ def main(args):
     station = stations.lwa1
     if args.lwasv:
         station = stations.lwasv
+    elif args.lwana:
+        station = stations.lwana
     elif sta == 'ovrolwa':
         station = stations.lwa1
         station.name = 'OVRO-LWA'
@@ -206,6 +208,8 @@ if __name__ == "__main__":
     sgroup = parser.add_mutually_exclusive_group(required=False)
     sgroup.add_argument('-v', '--lwasv', action='store_true',
                         help='use LWA-SV instead of LWA1 if the station is not specified in the HDF5 file')
+    sgroup.add_argument('-n', '--lwana', action='store_true',
+                        help='use LWA-NA instead of LWA1 if the station is not specified in the HDF5 file')
     sgroup.add_argument('-o', '--ovrolwa', action='store_true',
                         help='use OVRO-LWA instead of LWA1 if the station is not specified in the HDF5 file')
     args = parser.parse_args()

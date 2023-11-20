@@ -47,6 +47,8 @@ def main(args):
     observer = stations.lwa1.get_observer()
     if args.lwasv:
         observer = stations.lwasv.get_observer()
+    elif args.lwana:
+        observer = stations.lwana.get_observer()
     elif args.ovrolwa:
         station = stations.lwa1
         station.name = 'OVRO-LWA'
@@ -146,6 +148,8 @@ if __name__ == "__main__":
     sgroup = parser.add_mutually_exclusive_group(required=False)
     sgroup.add_argument('-v', '--lwasv', action='store_true',
                         help='compute for LWA-SV instead of LWA1')
+    sgroup.add_argument('-n', '--lwana', action='store_true',
+                        help='compute for LWA-NA instead of LWA1')
     sgroup.add_argument('-o', '--ovrolwa', action='store_true',
                         help='compute for OVRO-LWA instead of LWA1')
     parser.add_argument('-f', '--freqs', type=aph.positive_float, nargs=2, default=[37.9, 74.03],

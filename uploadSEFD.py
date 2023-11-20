@@ -10,7 +10,7 @@ URL = "https://lwalab.phys.unm.edu/OpScreen/update"
 
 
 def main(args):
-    for site in ('lwa1', 'lwasv'):
+    for site in ('lwa1', 'lwasv', 'lwana'):
         with open('metric-%s' % site, 'r') as fh:
             for line in fh:
                 line = line.strip().rstrip()
@@ -24,6 +24,7 @@ def main(args):
     p = os.path.dirname(os.path.abspath(__file__))
     os.system(os.path.join(p, 'influxSEFD.py'))
     os.system(os.path.join(p, 'influxSEFD_SV.py'))
+    os.system(os.path.join(p, 'influxSEFD_NA.py'))
 
 
 if __name__ == '__main__':

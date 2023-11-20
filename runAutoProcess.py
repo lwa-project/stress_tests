@@ -9,7 +9,7 @@ import getpass
 import subprocess
 from socket import gethostname
 
-from lsl.common import metabundle, metabundleADP
+from lsl.common import metabundle, metabundleADP, metabundleNDP
 
 # Where to find data to analyze
 SEARCH_DIR = '/data/network/recent_data/stress_tests/'
@@ -29,13 +29,22 @@ def main(args):
     
     for meta in metadata:
         ## Load in the metadata
+        if metabundleNDP.is_valid(meta):
+            smd = metabundleNDP.get_session_metadata(meta)
+            is_lwana = True
+            sname = 'LWA-NA'
+            oname = 'lwana'
         if metabundleADP.is_valid(meta):
             smd = metabundleADP.get_session_metadata(meta)
             is_lwasv = True
+            sname = 'LWA-SV'
+            oname = 'lwasv'
         else:
             smd = metabundle.get_session_metadata(meta)
             is_lwasv = False
-        print(f"Working on {os.path.basename(meta)} from {'LWA-SV' if is_lwasv else 'LWA1'}")
+            sname = 'LWA1'
+            oname = 'lwa1'
+        print(f"Working on {os.path.basename(meta)} from {sname}")
         
         ## Make sure the data are ready
         data = os.path.join(SEARCH_DIR, smd[1]['tag'])
@@ -71,7 +80,7 @@ def main(args):
             
         ## Record
         outname = os.path.join(SELF_DIR, 'metric-')
-        outname += ('lwasv' if is_lwasv else 'lwa1')
+        outname += oname
         with open(outname, 'a') as fh:
             fh.write(output)
         figname = os.path.basename(data)
@@ -85,7 +94,7 @@ def main(args):
             print(f"WARNING: Failed to move output image {os.path.basename(figname)}")
             
         ## Upload to the OpScreen page
-        for script in ('uploadSEFD.py', 'influxSEFD.py', 'influxSEFD_SV.py'):
+        for script in ('uploadSEFD.py', 'influxSEFD.py', 'influxSEFD_SV.py', 'influxSEFD_NA.py'):
             cmd = [sys.executable, os.path.join(SELF_DIR, script),]
             if not os.path.exists(cmd[0]):
                 continue

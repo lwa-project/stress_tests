@@ -140,6 +140,9 @@ def main(args):
         if args.lwasv:
             sta = 'lwasv'
             observer = stations.lwasv.get_observer()
+        elif args.lwana:
+            sta = 'lwana'
+            observer = stations.lwana.get_observer()
         elif args.ovrolwa:
             sta = 'ovrolwa'
             station = stations.lwa1
@@ -157,6 +160,9 @@ def main(args):
         elif sta == 'lwasv':
             print("Data appears to be from LWA-SV")
             observer = stations.lwasv.get_observer()
+        elif sta == 'lwana':
+            print("Data appears to be from LWA-NA")
+            observer = stations.lwana.get_observer()
         elif sta == 'ovrolwa':
             print("Data appears to be from OVRO-LWA")
             sta_name = 'OVRO-LWA'
@@ -445,6 +451,8 @@ if __name__ == "__main__":
     sgroup = parser.add_mutually_exclusive_group(required=False)
     sgroup.add_argument('-v', '--lwasv', action='store_true',
                         help='use LWA-SV instead of LWA1 if the station is not specified in the HDF5 file')
+    sgroup.add_argument('-n', '--lwana', action='store_true',
+                        help='use LWA-NA instead of LWA1 if the station is not specified in the HDF5 file')
     sgroup.add_argument('-o', '--ovrolwa', action='store_true',
                         help='use OVRO-LWA instead of LWA1 if the station is not specified in the HDF5 file')
     parser.add_argument('--headless', action='store_true',
