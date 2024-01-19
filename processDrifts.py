@@ -142,7 +142,14 @@ def main(args):
             observer = stations.lwasv.get_observer()
         elif args.lwana:
             sta = 'lwana'
-            observer = stations.lwana.get_observer()
+            try:
+                observer = stations.lwana.get_observer()
+            except AttributeError:
+                ## Catch for older LSL
+                station = stations.lwa1
+                station.name = 'LWA-NA'
+                station.lat, station.lon, station.elev = ('34.247', '-107.640', 2133.6)
+                observer = station.get_observer()
         elif args.ovrolwa:
             sta = 'ovrolwa'
             station = stations.lwa1
@@ -162,7 +169,14 @@ def main(args):
             observer = stations.lwasv.get_observer()
         elif sta == 'lwana':
             print("Data appears to be from LWA-NA")
-            observer = stations.lwana.get_observer()
+            try:
+                observer = stations.lwana.get_observer()
+            except AttributeError:
+                ## Catch for older LSL
+                station = stations.lwa1
+                station.name = 'LWA-NA'
+                station.lat, station.lon, station.elev = ('34.247', '-107.640', 2133.6)
+                observer = station.get_observer()
         elif sta == 'ovrolwa':
             print("Data appears to be from OVRO-LWA")
             sta_name = 'OVRO-LWA'

@@ -36,7 +36,13 @@ def main(args):
     if args.lwasv:
         station = stations.lwasv
     elif args.lwana:
-        station = stations.lwana
+        try:
+            observer = stations.lwana.get_observer()
+        except AttributeError:
+            ## Catch for older LSL
+            station = stations.lwa1
+            station.name = 'LWA-NA'
+            station.lat, station.lon, station.elev = ('34.247', '-107.640', 2133.6)
     elif sta == 'ovrolwa':
         station = stations.lwa1
         station.name = 'OVRO-LWA'
