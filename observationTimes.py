@@ -48,6 +48,15 @@ def main(args):
     observer = stations.lwa1.get_observer()
     if args.lwasv:
         observer = stations.lwasv.get_observer()
+    elif args.lwasv:
+        try:
+            observer = stations.lwana.get_observer()
+        except AttributeError:
+            ## Catch for older LSL
+            station = stations.lwa1
+            station.name = 'LWA-NA'
+            station.lat, station.lon, station.elev = ('34.247', '-107.640', 2133.6)
+            observer = station.get_observer()
     elif args.ovrolwa:
         station = stations.lwa1
         station.name = 'OVRO-LWA'
@@ -133,6 +142,8 @@ if __name__ == "__main__":
     sgroup = parser.add_mutually_exclusive_group(required=False)
     sgroup.add_argument('-v', '--lwasv', action='store_true',
                         help='compute for LWA-SV instead of LWA1')
+    sgroup.add_argument('-n', '--lwana', action='store_true',
+                        help='compute for LWA-NA instead of LWA1')
     sgroup.add_argument('-o', '--ovrolwa', action='store_true',
                         help='compute for OVRO-LWA instead of LWA1')
     parser.add_argument('-l', '--list', action='store_true',

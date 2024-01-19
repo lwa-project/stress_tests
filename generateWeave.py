@@ -47,6 +47,15 @@ def main(args):
     observer = stations.lwa1.get_observer()
     if args.lwasv:
         observer = stations.lwasv.get_observer()
+    elif args.lwana:
+        try:
+            observer = stations.lwana.get_observer()
+        except AttributeError:
+            ## Catch for older LSL
+            station = stations.lwa1
+            station.name = 'LWA-NA'
+            station.lat, station.lon, station.elev = ('34.247', '-107.640', 2133.6)
+            observer = station.get_observer()
     elif args.ovrolwa:
         station = stations.lwa1
         station.name = 'OVRO-LWA'
@@ -70,12 +79,14 @@ def main(args):
     
     # Come up with the pattern
     pnts = []
+    ## Scale for whether or not it is a mini-station
+    pm_range = 8.0 if args.ministation else 4.0
     ## First, declination
-    for offset in numpy.linspace(-4.0, 4.0, 17):
+    for offset in numpy.linspace(-pm_range, pm_range, 17):
         pnts.append( (src._ra, ephem.degrees(src._dec+offset*numpy.pi/180)) )
     #pnts.extend(pnts)
     ## Now, RA
-    for offset in numpy.linspace(-4.0, 4.0, 17):
+    for offset in numpy.linspace(-pm_range, pm_range, 17):
         offset = offset / numpy.cos(src.dec)
         pnts.append( (ephem.hours(src._ra+offset*numpy.pi/180), src._dec) )
     #pnts.extend(pnts)
@@ -146,8 +157,12 @@ if __name__ == "__main__":
     sgroup = parser.add_mutually_exclusive_group(required=False)
     sgroup.add_argument('-v', '--lwasv', action='store_true',
                         help='compute for LWA-SV instead of LWA1')
+    sgroup.add_argument('-n', '--lwana', action='store_true',
+                        help='compute for LWA-NA instead of LWA1')
     sgroup.add_argument('-o', '--ovrolwa', action='store_true',
                         help='compute for OVRO-LWA instead of LWA1')
+    parser.add_argument('-m', '--ministation', action='store_true',
+                        help='setup a run for a mini-station instead of a full station')
     parser.add_argument('-f', '--freqs', type=aph.positive_float, nargs=2, default=[37.9, 74.03],
                         help='center frequencies for the two tunings in MHz')
     parser.add_argument('-l', '--list', action='store_true',
