@@ -86,6 +86,7 @@ def main(args):
         cmd.append('-v')
     elif _IS_LWANA:
         cmd.append('-n')
+        cmd.append('-m')
     cmd.extend(['CygA', mid.strftime("%Y/%m/%d"), mid.strftime("%H:%M:%S")])
     output = subprocess.check_output(cmd, stderr=subprocess.DEVNULL,
                                      cwd=os.path.abspath(os.path.dirname(__file__)))
