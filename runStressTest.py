@@ -161,12 +161,12 @@ def main(args):
     print("Scheduling 'at' commands")
     atCommands = []
     atIDs = []
-    if _IS_LWASV or _IS_LWANA:
+    if _IS_LWASV:
         tDRX = stop - timedelta(minutes=1)
         tDRX = tDRX.replace(second=0, microsecond=0)
         atCommands.append( (tDRX, '/home/op1/MCS/exec/set_default_freqs.sh') )
         
-    else:
+    elif not _IS_LWANA:
         tINI = start + timedelta(minutes=2)
         tINI = tINI.replace(second=0, microsecond=0)
         atCommands.append( (tINI, '/home/op1/MCS/sch/INIdp.sh') )
