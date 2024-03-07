@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import pytz
 from datetime import datetime
 
 from lwa_auth import KEYS as LWA_AUTH_KEYS
@@ -10,12 +11,18 @@ from lwa_auth.signed_requests import post as signed_post
 
 URL = "https://lwalab.phys.unm.edu/OpScreen/update"
 
+# Timezone for the OpScreen page
+UTC = pytz.utc
+MST = pytz.timezone('America/Denver')
+
 
 def _serialize_datetime(value):
     try:
-        return value.isoformat()
-        except AttributeError:
-    return value
+        if value.tzinfo is not None:
+            value = value.astimezone(UTC)
+        return value.isoformat() + 'Z'
+    except AttributeError:
+        return value
 
 
 def main(args):
