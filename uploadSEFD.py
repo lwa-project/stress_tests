@@ -11,9 +11,7 @@ from lwa_auth.signed_requests import post as signed_post
 
 URL = "https://lwalab.phys.unm.edu/OpScreen/update"
 
-# Timezone for the OpScreen page
 UTC = pytz.utc
-MST = pytz.timezone('America/Denver')
 
 
 def _serialize_datetime(value):
