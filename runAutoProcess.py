@@ -14,8 +14,8 @@ try:
     from lsl.common import metabundleNDP
 except ImportError:
     # Catch for older LSL
-    from lsl.common import metabundleADP as metabundleNDP
-
+    metabundleNDP = metabundleADP
+    
 # Where to find data to analyze
 SEARCH_DIR = '/data/network/recent_data/stress_tests/'
 
