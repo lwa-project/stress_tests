@@ -13,7 +13,12 @@ import subprocess
 from datetime import datetime, timedelta
 from socket import gethostname
 
-from lsl.common import stations, sdf, sdfADP, sdfNDP, busy
+from lsl.common import stations, sdf, sdfADP, busy
+try:
+    from lsl.common import sdfNDP
+except ImportError:
+    # Catch for older LSL
+    sdfNDP = sdfADP
 from lsl.common.mcs import mjdmpm_to_datetime
 
 from lwa_mcs.tp import schedule_sdfs
