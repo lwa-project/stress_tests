@@ -30,7 +30,7 @@ def main(args):
     # Find the two most recent metadata files
     metadata = glob.glob(os.path.join(SEARCH_DIR, '*.tgz'))
     metadata.sort(key=lambda x: os.path.getmtime(x))
-    metadata = metadata[-2:]
+    metadata = metadata[-3:]
     
     for meta in metadata:
         ## Load in the metadata
