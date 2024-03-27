@@ -32,8 +32,8 @@ def main(args):
             
             data = []
             data.append({'source':     line[0],
-                         'zenith_ang': line[3],
-                         'frequency':  float(line[4]),
+                         'zenith_ang': line[4],
+                         'frequency':  float(line[3]),
                          'err_ra':     line[5],
                          'err_dec':    line[6],
                          'sefd':       float(line[7]),
