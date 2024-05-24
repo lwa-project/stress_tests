@@ -118,6 +118,12 @@ def main(args):
                     station.name = 'LWA-NA'
                     station.lat, station.lon, station.elev = ('34.247', '-107.640', 2133.6)
                     observer = station.get_observer()
+            elif args.ovrolwa:
+                sta = 'ovrolwa'
+                station = stations.lwa1
+                station.name = 'OVRO-LWA'
+                station.lat, station.lon, station.elev = ('37.23977727', '-118.2816667', 1183.48)
+                observer = station.get_observer()
         else:
             try:
                 sta = sta.decode()
@@ -147,7 +153,7 @@ def main(args):
                 sta_name = 'OVRO-LWA'
                 station = stations.lwa1
                 station.name = 'OVRO-LWA'
-                station.lat, station.lon, station.elev = ('37.23977727', '-118.2816667', 1182.89)
+                station.lat, station.lon, station.elev = ('37.23977727', '-118.2816667', 1183.48)
                 observer = station.get_observer()
             else:
                 raise RuntimeError("Unknown LWA station name: %s" % sta)
