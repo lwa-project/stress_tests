@@ -18,7 +18,7 @@ from lsl.common.mcs import apply_pointing_correction
 
 __version__ = "0.2"
 __all__ = ['getSources', 'getAIPYSources', 'parse', 'fitDriftscan', 'fitDecOffset',
-           'fitDataWithRotation', '__version__', '__all__']
+           'fitDataWithRotation']
 
 
 # List of bright radio sources and pulsars in PyEphem format
