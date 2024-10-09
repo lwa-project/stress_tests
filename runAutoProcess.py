@@ -36,7 +36,7 @@ def main(args):
         ## Load in the metadata
         is_lwana = False
         is_lwasv = False
-        sstyle = metabundle.get_style(filename)
+        sstyle = metabundle.get_style(meta)
         if sstyle.endswith('metabundleDP'):
             smd = metabundle.get_session_metadata(meta)
             sname = 'LWA1'
