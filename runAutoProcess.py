@@ -36,20 +36,24 @@ def main(args):
         ## Load in the metadata
         is_lwana = False
         is_lwasv = False
-        if metabundle.is_valid(meta):
+        sstyle = metabundle.get_style(filename)
+        if sstyle.endswith('metabundleDP'):
             smd = metabundle.get_session_metadata(meta)
             sname = 'LWA1'
             oname = 'lwa1'
-        elif metabundleADP.is_valid(meta):
+        elif sstyle.endswith('metabundleADP'):
             smd = metabundleADP.get_session_metadata(meta)
             is_lwasv = True
             sname = 'LWA-SV'
             oname = 'lwasv'
-        else: #elif metabundleADP.is_valid(meta):
+        elif sstyle.endswith('metabundleNDP'):
             smd = metabundleNDP.get_session_metadata(meta)
             is_lwana = True
             sname = 'LWA-NA'
             oname = 'lwana'
+        else:
+            print(f"Unknown metadata style '{sstyle}' for {os.path.basename(meta)}, skipping")
+            continue
         print(f"Working on {os.path.basename(meta)} from {sname}")
         
         ## Make sure the data are ready
