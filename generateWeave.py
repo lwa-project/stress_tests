@@ -48,14 +48,7 @@ def main(args):
     if args.lwasv:
         observer = stations.lwasv.get_observer()
     elif args.lwana:
-        try:
-            observer = stations.lwana.get_observer()
-        except AttributeError:
-            ## Catch for older LSL
-            station = stations.lwa1
-            station.name = 'LWA-NA'
-            station.lat, station.lon, station.elev = ('34.247', '-107.640', 2133.6)
-            observer = station.get_observer()
+        observer = stations.lwana.get_observer()
     elif args.ovrolwa:
         station = stations.lwa1
         station.name = 'OVRO-LWA'
@@ -96,17 +89,12 @@ def main(args):
     pnts = [(r,p) for p,r in zip(pnts,refs)]
     pnts = [p for pair in pnts for p in pair]
     
-    # Setup to deal with out LWA-SV is
-    beam  = 2									## Beam to use
+    # Setup the beam and the step size
+    beam  = 1 if args.lwasv else 2				## Beam to use
     spc   = [1024, 1536]						## Spectrometer setup
     flt   = 7									## DRX filter code
     tstep = timedelta(seconds=6, microseconds=0)	## Date step between the pointings
-    if args.lwasv:
-        beam  = 1									## Beam to use
-        spc   = [1024, 1536]						## Spectrometer setup
-        flt   = 7									## DRX filter code
-        tstep = timedelta(seconds=6, microseconds=0)	## Date step between the pointings
-        
+    
     # Setup the times
     midPoint = datetime.strptime(date, "%Y/%m/%d %H:%M:%S")
     start = midPoint - len(pnts)//2*tstep

@@ -171,15 +171,6 @@ def main(args):
         tDRX = tDRX.replace(second=0, microsecond=0)
         atCommands.append( (tDRX, '/home/op1/MCS/exec/set_default_freqs.sh') )
         
-    elif not _IS_LWANA:
-        tINI = start + timedelta(minutes=2)
-        tINI = tINI.replace(second=0, microsecond=0)
-        atCommands.append( (tINI, '/home/op1/MCS/sch/INIdp.sh') )
-        
-        tTBN = stop - timedelta(minutes=1)
-        tTBN = tTBN.replace(second=0, microsecond=0)
-        atCommands.append( (tTBN, '/home/op1/MCS/sch/startTBN_split.sh') )
-        
     ## Implement the commands
     for atcmd in atCommands:
         if not args.dry_run:
