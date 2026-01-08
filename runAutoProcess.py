@@ -9,12 +9,7 @@ import getpass
 import subprocess
 from socket import gethostname
 
-from lsl.common import metabundle, metabundleADP
-try:
-    from lsl.common import metabundleNDP
-except ImportError:
-    # Catch for older LSL
-    metabundleNDP = metabundleADP
+from lsl.common import metabundle
     
 # Where to find data to analyze
 SEARCH_DIR = '/data/network/recent_data/stress_tests/'
@@ -36,24 +31,13 @@ def main(args):
         ## Load in the metadata
         is_lwana = False
         is_lwasv = False
-        sstyle = metabundle.get_style(meta)
-        if sstyle.endswith('metabundleDP'):
-            smd = metabundle.get_session_metadata(meta)
-            sname = 'LWA1'
-            oname = 'lwa1'
-        elif sstyle.endswith('metabundleADP'):
-            smd = metabundleADP.get_session_metadata(meta)
-            is_lwasv = True
-            sname = 'LWA-SV'
-            oname = 'lwasv'
-        elif sstyle.endswith('metabundleNDP'):
-            smd = metabundleNDP.get_session_metadata(meta)
-            is_lwana = True
-            sname = 'LWA-NA'
-            oname = 'lwana'
-        else:
-            print(f"Unknown metadata style '{sstyle}' for {os.path.basename(meta)}, skipping")
-            continue
+        
+        smd = metabundle.get_session_metadata(meta)
+        mhn = metabundle.get_mcs_hostname(meta)
+        oname = mhn.split('-')[0]
+        sname = oname.upper()
+        if sname != 'LWA1':
+            sname = sname[:-2]+'-'+sname[-2:]
         print(f"Working on {os.path.basename(meta)} from {sname}")
         
         ## Make sure the data are ready
