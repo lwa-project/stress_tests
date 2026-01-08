@@ -195,15 +195,15 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Schedule a CygA stress test')
-    sdf.add_argument('start_date', type=str, 
+    parser.add_argument('start_date', type=str, 
                         help='scheduling window UTC start date in YYYY/MM/DD format')
-    sdf.add_argument('start_time', type=str,
+    parser.add_argument('start_time', type=str,
                         help='scheduling window UTC start time in HH:MM:SS format')
-    sdf.add_argument('stop_date', type=str, 
+    parser.add_argument('stop_date', type=str, 
                         help='scheduling window UTC stop date in YYYY/MM/DD format')
-    sdf.add_argument('stop_time', type=str,
+    parser.add_argument('stop_time', type=str,
                         help='scheduling window UTC stop time in HH:MM:SS format')
-    sdf.add_argument('-n', '--dry-run', action='store_true', 
+    parser.add_argument('-n', '--dry-run', action='store_true', 
                         help='perform a dry-run only')
     args = parser.parse_args()
     main(args)
