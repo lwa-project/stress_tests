@@ -130,7 +130,7 @@ def main(args):
         session = sdf.Session("Pointing Check Session Using %s" % srcs[toUse].name, args.session_id[sdfCount % len(args.session_id)])
         project = sdf.Project(observer, "DRX Pointing Checking", "COMST", [session,])
         project.sessions[0].drx_beam = beam
-        project.sessions[0].spcSetup = spc
+        project.sessions[0].spc_setup = spc
         project.sessions[0].logScheduler = False
         project.sessions[0].logExecutive = False
         if args.ucf_username is not None:
