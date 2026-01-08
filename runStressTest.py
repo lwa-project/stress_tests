@@ -13,12 +13,7 @@ import subprocess
 from datetime import datetime, timedelta
 from socket import gethostname
 
-from lsl.common import stations, sdf, sdfADP, busy
-try:
-    from lsl.common import sdfNDP
-except ImportError:
-    # Catch for older LSL
-    sdfNDP = sdfADP
+from lsl.common import stations, sdf, busy
 from lsl.common.mcs import mjdmpm_to_datetime
 
 from lwa_mcs.tp import schedule_sdfs
@@ -102,12 +97,7 @@ def main(args):
     filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
     
     # Parse it to get an "official" start/stop time
-    parser = sdf
-    if _IS_LWASV:
-        parser = sdfADP
-    elif _IS_LWANA:
-        parser = sdfNDP
-    test_plan = parser.parse_sdf(filename)
+    test_plan = sdf.parse_sdf(filename)
     test_beam = test_plan.sessions[0].drx_beam
     test_start = mjdmpm_to_datetime(test_plan.sessions[0].observations[0].mjd,
                                     test_plan.sessions[0].observations[0].mpm)
@@ -205,15 +195,15 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Schedule a CygA stress test')
-    parser.add_argument('start_date', type=str, 
+    sdf.add_argument('start_date', type=str, 
                         help='scheduling window UTC start date in YYYY/MM/DD format')
-    parser.add_argument('start_time', type=str,
+    sdf.add_argument('start_time', type=str,
                         help='scheduling window UTC start time in HH:MM:SS format')
-    parser.add_argument('stop_date', type=str, 
+    sdf.add_argument('stop_date', type=str, 
                         help='scheduling window UTC stop date in YYYY/MM/DD format')
-    parser.add_argument('stop_time', type=str,
+    sdf.add_argument('stop_time', type=str,
                         help='scheduling window UTC stop time in HH:MM:SS format')
-    parser.add_argument('-n', '--dry-run', action='store_true', 
+    sdf.add_argument('-n', '--dry-run', action='store_true', 
                         help='perform a dry-run only')
     args = parser.parse_args()
     main(args)
