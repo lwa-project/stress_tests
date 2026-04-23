@@ -10,7 +10,7 @@ import sys
 import math
 import argparse
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from socket import gethostname
 
 from lsl.common import stations, sdf, busy
@@ -38,7 +38,9 @@ _IS_LWANA = gethostname().lower().find('lwana') != -1
 def main(args):
     # Get the start and stop times for the window that we are scheduling
     start = datetime.strptime('%s %s' % (args.start_date, args.start_time), '%Y/%m/%d %H:%M:%S')
+    start = start.replace(tzinfo=timezone.utc)
     stop  = datetime.strptime('%s %s' % (args.stop_date, args.stop_time), '%Y/%m/%d %H:%M:%S')
+    stop = stop.replace(tzinfo=timezone.utc)
     print("Scheduling stress test for %s to %s" % (start.strftime('%Y/%m/%d %H:%M:%S'),  
                                                    stop.strftime('%Y/%m/%d %H:%M:%S')))
     print("  Window is %.1f min long" % ((stop-start).total_seconds()/60.0,))
@@ -100,10 +102,12 @@ def main(args):
     test_plan = sdf.parse_sdf(filename)
     test_beam = test_plan.sessions[0].drx_beam
     test_start = mjdmpm_to_datetime(test_plan.sessions[0].observations[0].mjd,
-                                    test_plan.sessions[0].observations[0].mpm)
+                                    test_plan.sessions[0].observations[0].mpm,
+                                    tz=timezone.utc)
     test_stop = mjdmpm_to_datetime(test_plan.sessions[0].observations[-1].mjd,
                                    test_plan.sessions[0].observations[-1].mpm \
-                                   + test_plan.sessions[0].observations[-1].dur)
+                                   + test_plan.sessions[0].observations[-1].dur,
+                                    tz=timezone.utc)
     
     # Move it into place
     if not args.dry_run:
