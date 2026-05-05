@@ -10,40 +10,6 @@ import subprocess
 from socket import gethostname
 
 from lsl.common import metabundle
-try:
-    from lsl.common import metabundleADP, metabundleNDP
-except ImportError:
-    # Catch for older LSL
-    metabundleADP = metabundle
-    metabundleNDP = metabundle
-
-from lsl.common._metabundle_utils import *
-
-
-def get_mcs_hostname(tarname):
-    """
-    Given an MCS meta-data tarball, extract the information stored in the mcs.host 
-    file and return it as a string.
-    
-    If a mcs.host file cannot be found in the tarball, 'unknown' is returned.  
-    """
-    
-    with managed_mkdtemp(prefix='metadata-bundle-') as tempDir:
-        # Extract the SSMIF and SDM files.  If the ssmif.dat file cannot be found, None
-        # is returned via the try...except block
-        tf = _open_tarball(tarname)
-        try:
-            ti = tf.getmember('mcs.host')
-        except KeyError:
-            return 'unknown'
-        tf.extractall(path=tempDir, members=[ti,])
-        
-        # Read in the name
-        with open(os.path.join(tempDir, 'mcs.host'), 'r') as fh:
-            name = fh.read().strip()
-            
-    # Return
-    return name
 
 
 # Where to find data to analyze
@@ -70,66 +36,13 @@ def main(args):
             sstyle = 'metabundleDP'
             
         is_lwasv = False
-        is_lwana = False
-        if sstyle.endswith('metabundleDP'):
-            smd = metabundle.get_session_metadata(meta)
-            sname = 'LWA1'
-            oname = 'lwa1'
-            
-            oname = get_mcs_hostname(meta)
-            if oname.startswith('lwa1'):
-                sname = 'LWA1'
-                oname = 'lwa1'
-            elif oname.startswith('lwasv'):
-                is_lwasv = True
-                sname = 'LWA-SV'
-                oname = 'lwasv'
-            elif oname.startswith('lwana'):
-                is_lwana=True
-                sname = 'LWA-NA'
-                oname = 'lwana'
-                
-        elif sstyle.endswith('metabundleADP'):
-            smd = metabundleADP.get_session_metadata(meta)
-            is_lwasv = True
-            sname = 'LWA-SV'
-            oname = 'lwasv'
-            
-            oname = get_mcs_hostname(meta)
-            if oname.startswith('lwa1'):
-                sname = 'LWA1'
-                oname = 'lwa1'
-            elif oname.startswith('lwasv'):
-                is_lwasv = True
-                sname = 'LWA-SV'
-                oname = 'lwasv'
-            elif oname.startswith('lwana'):
-                is_lwana=True
-                sname = 'LWA-NA'
-                oname = 'lwana'
-                
-        elif sstyle.endswith('metabundleNDP'):
-            smd = metabundleNDP.get_session_metadata(meta)
-            is_lwana = True
-            sname = 'LWA-NA'
-            oname = 'lwana'
-            
-            oname = get_mcs_hostname(meta)
-            if oname.startswith('lwa1'):
-                sname = 'LWA1'
-                oname = 'lwa1'
-            elif oname.startswith('lwasv'):
-                is_lwasv = True
-                sname = 'LWA-SV'
-                oname = 'lwasv'
-            elif oname.startswith('lwana'):
-                is_lwana=True
-                sname = 'LWA-NA'
-                oname = 'lwana'
-                
-        else:
-            print(f"Unknown metadata style '{sstyle}' for {os.path.basename(meta)}, skipping")
-            continue
+        
+        smd = metabundle.get_session_metadata(meta)
+        mhn = metabundle.get_mcs_hostname(meta)
+        oname = mhn.split('-')[0]
+        sname = oname.upper()
+        if sname != 'LWA1':
+            sname = sname[:-2]+'-'+sname[-2:]
         print(f"Working on {os.path.basename(meta)} from {sname}")
         
         ## Make sure the data are ready
