@@ -1,7 +1,7 @@
 aipy
 astropy
 h5py
-lsl
+lsl >= 4
 lwa_auth
 lwa_mcs
 matplotlib
