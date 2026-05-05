@@ -10,7 +10,8 @@ import subprocess
 from socket import gethostname
 
 from lsl.common import metabundle
-    
+
+
 # Where to find data to analyze
 SEARCH_DIR = '/data/network/recent_data/stress_tests/'
 
@@ -29,7 +30,11 @@ def main(args):
     
     for meta in metadata:
         ## Load in the metadata
-        is_lwana = False
+        try:
+            sstyle = metabundle.get_style(meta)
+        except AttributeError:
+            sstyle = 'metabundleDP'
+            
         is_lwasv = False
         
         smd = metabundle.get_session_metadata(meta)
