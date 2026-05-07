@@ -160,11 +160,7 @@ def main(args):
     print("Scheduling 'at' commands")
     atCommands = []
     atIDs = []
-    if _IS_LWASV:
-        tDRX = stop - timedelta(minutes=1)
-        tDRX = tDRX.replace(second=0, microsecond=0)
-        atCommands.append( (tDRX, '/home/op1/MCS/exec/set_default_freqs.sh') )
-        
+    
     ## Implement the commands
     for atcmd in atCommands:
         if not args.dry_run:
