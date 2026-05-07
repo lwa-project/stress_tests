@@ -90,9 +90,9 @@ def main(args):
     pnts = [p for pair in pnts for p in pair]
     
     # Setup the beam and the step size
-    beam  = 1 if args.lwasv else 2				## Beam to use
-    spc   = [1024, 1536]						## Spectrometer setup
-    flt   = 7									## DRX filter code
+    beam  = 2				                        ## Beam to use
+    spc   = [1024, 1536]						    ## Spectrometer setup
+    flt   = 7									    ## DRX filter code
     tstep = timedelta(seconds=6, microseconds=0)	## Date step between the pointings
     
     # Setup the times
