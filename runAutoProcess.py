@@ -46,7 +46,11 @@ def main(args):
         print(f"Working on {os.path.basename(meta)} from {sname}")
         
         ## Make sure the data are ready
-        data = os.path.join(SEARCH_DIR, smd[1]['tag'])
+        try:
+            data = os.path.join(SEARCH_DIR, smd[1]['tag'])
+        except KeyError:
+            print(f"WARNING: Could not find data file name in {os.path.basename(meta)}, skipping")
+            continue
         if not os.path.exists(data):
             print(f"WARNING: No data file found for {os.path.basename(meta)}, skipping")
             continue
