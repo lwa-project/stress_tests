@@ -50,6 +50,13 @@ def err(p, x, y):
     return y - yFit 
 
 
+def is_valid_sefd(value):
+    if value > 0:   # Inherently catches Nan values
+        return True
+    else:
+        return False
+
+
 def main(args):
     filenames = args.filename
     
@@ -392,8 +399,18 @@ def main(args):
             ax.set_ylabel('Power [arb., corr.]')
             
             # Save
-            fwhmEstimate = ephem.degrees((fwhmD + fwhmR) / 2.0)
-            sefdEstimate = (sefdEstimateD + sefdEstimateR) / 2.0
+            if is_valid_sefd(sefdEstimateD) and not is_valid_sefd(sefdEstimateR):
+                ## Only the dec cut is good
+                fwhmEstimate = ephem.degrees(180)
+                sefdEstimate = sefdEstimateD
+            elif is_valid_sefd(sefdEstimateR) and not is_valid_sefd(sefdEstimateD):
+                ## Only the RA cut is good
+                fwhmEstimate = ephem.degrees(180)
+                sefdEstimate = sefdEstimateR
+            else:
+                ## Either both are good or neither are good
+                fwhmEstimate = ephem.degrees((fwhmD + fwhmR) / 2.0)
+                sefdEstimate = (sefdEstimateD + sefdEstimateR) / 2.0
             finalResults.append( "%-6s %-19s %6.3f %-10s %-10s %-10s %10.3f %-10s" % \
                                 (srcs[toUse].name, datetime.utcfromtimestamp(tTransit).strftime("%Y/%m/%d %H:%M:%S"), f/1e6, zenithAngle, raOffset, decOffset, sefdEstimate, fwhmEstimate) )
             
