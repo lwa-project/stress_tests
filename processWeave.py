@@ -401,11 +401,11 @@ def main(args):
             # Save
             if is_valid_sefd(sefdEstimateD) and not is_valid_sefd(sefdEstimateR):
                 ## Only the dec cut is good
-                fwhmEstimate = ephem.degrees(180)
+                fwhmEstimate = ephem.degrees(ephem.degrees(fwhmD) + 2*numpy.pi)
                 sefdEstimate = sefdEstimateD
             elif is_valid_sefd(sefdEstimateR) and not is_valid_sefd(sefdEstimateD):
                 ## Only the RA cut is good
-                fwhmEstimate = ephem.degrees(180)
+                fwhmEstimate = ephem.degrees(ephem.degrees(fwhmR) + 4*numpy.pi)
                 sefdEstimate = sefdEstimateR
             else:
                 ## Either both are good or neither are good

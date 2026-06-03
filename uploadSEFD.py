@@ -3,21 +3,20 @@
 import os
 import sys
 import json
-import pytz
-from datetime import datetime
+import math
+import ephem
+from datetime import datetime, timezone
 
 from lwa_auth import KEYS as LWA_AUTH_KEYS
 from lwa_auth.signed_requests import post as signed_post
 
 URL = "https://lwalab.phys.unm.edu/OpScreen/update"
 
-UTC = pytz.utc
-
 
 def _serialize_datetime(value):
     try:
         if value.tzinfo is not None:
-            value = value.astimezone(UTC)
+            value = value.astimezone(timezone.utc)
         return value.isoformat() + 'Z'
     except AttributeError:
         return value
@@ -30,6 +29,18 @@ def main(args):
                 line = line.strip().rstrip()
             line = line.split()
             
+            fit_flag = ''
+            try:
+                fwhm = ephem.degrees(line[8])
+                if fwhm >= 4*math.pi:
+                    fit_flag = 'RA only fit'
+                elif fwhm >= 2*math.pi:
+                    fit_flag = 'dec. only fit'
+                elif fwhm <= 0 or fwhm != fwhm:
+                    fit_flag = 'fitting failed'
+            except ValueError:
+                pass
+                
             data = []
             data.append({'source':     line[0],
                          'zenith_ang': line[4],
@@ -38,6 +49,7 @@ def main(args):
                          'err_dec':    line[6],
                          'sefd':       float(line[7]),
                          'fwhm':       line[8],
+                         'fit_flag':   fit_flag,
                          'updated':    datetime.strptime(f"{line[1]} {line[2]}", "%Y/%m/%d %H:%M:%S")})
             
             out = json.dumps(data, default=_serialize_datetime)
